@@ -34,6 +34,7 @@ class InstaBot:
         #humazine mouse 
         self.cursor = SystemCursor()
 
+        #to store profile
         self.reels_share_profile = {}
 
     def close_instagram(self):
@@ -67,7 +68,7 @@ class InstaBot:
     def send_reel(self, name = None):
         direct_button = locate(images.reels.direct_btn)
         if not direct_button:
-            print("Direct Button not found")
+            log("Direct Button not found...")
             return
         x = direct_button[0] - random.randint(1, 10)
         y = direct_button[1] + random.randint(1, 10)
@@ -83,7 +84,7 @@ class InstaBot:
             sleep(random.uniform(1, 2))
             suggested_label = locate(images.reels.suggest_lbl, confidence= 0.7)
             if not suggested_label:
-                print("suggested_label not found")
+                log("Suggested_label not found")
                 return
         
         if name:
@@ -92,7 +93,7 @@ class InstaBot:
             is_scrolled = False
 
             if profile:
-                print(f"Profile Found")
+                # print(f"Profile Found")
                 x = suggested_label[0] + random.randint(50,250)
                 y = suggested_label[1] - random.randint(1, 5)
                 sleep(random.uniform(0.1, 0.6))
@@ -117,11 +118,11 @@ class InstaBot:
                     self.cursor.move_to([x, y])
 
                 else:
-                    print("can't find the profile after scrolling")
+                    # print("can't find the profile after scrolling")
                     profile = None
 
             if not profile:
-                print("not profile")
+                # print("not profile")
 
                 if is_scrolled:
                     # clicking on "To:" input box
@@ -151,7 +152,7 @@ class InstaBot:
                 x = suggested_label[0] + random.randint(10, 300)
                 
         else:
-            print("No name is given, so sedning to first person")
+            log("Reel sent to first person in list")
             y = suggested_label[1] + random.randint(40, 100)
             x = suggested_label[0] + random.randint(10, 300)
 
@@ -187,7 +188,7 @@ class InstaBot:
         sleep(random.uniform(0.8, 3))
 
 
-        while liked < amount:
+        while liked <= amount:
             #scroll reels
             scroll = random.randrange(60,200, 10)
             pyautogui.scroll(-abs(scroll))
@@ -215,10 +216,11 @@ class InstaBot:
 
                 click_on(click_duration = random.uniform(0.1, 0.3))
 
-                log(f"Post liked")
                 liked += 1
+                log(f"Post liked [{liked}/{amount}]")
 
-                if True:
+
+                if decision():
                     name = random.choice(self.friends)
                     st = self.send_reel(name=name)
                     if st:
@@ -240,7 +242,7 @@ class InstaBot:
 
 
             else:
-                log("reel skipped randomly..")
+                log("Reel skipped randomly..")
                 if decision():
                     watch_time = random.randrange(8, 25, 2)
                 else:
@@ -248,9 +250,9 @@ class InstaBot:
                     if decision(): #pause the reel
                         if is_cursor_on_reel: # pause by left click
                             pyautogui.click()
-                            print(f"Pause by click")
+                            # print(f"Pause by click")
                         else:
-                            print(f"Pause by pause button")
+                            # print(f"Pause by pause button")
                             pyautogui.press('playpause')
 
                 log(f" Watching reel for {convert_time(watch_time)} (Not liking)")
@@ -282,15 +284,15 @@ class InstaBot:
             if not decision():#like or not
                 positioned_like_button(location[1], self.height)
                 if video:
-                    print(f"This is a video....")
+                    log(f"This is a video....")
                     view_time = random.randrange(4, 20, 1)
                     if is_mute():
-                        print("Video is muted")
+                        log("Video is muted")
                         un_mute()
-                        print("Now it is un_muted")
+                        log("Now it is un_muted")
 
                 else:
-                    print(f"This is a photo")
+                    log(f"This is a photo")
                     view_time = random.randrange(2, 10, 1)
                     
                 sleep(view_time)
@@ -298,7 +300,7 @@ class InstaBot:
                 location = locate(images.home.like, region=(200, 0, self.width, self.height))
 
                 if not location:
-                    print("error ==> location not found", location)
+                    log("error ==> location not found", location)
                     continue
 
 
@@ -309,8 +311,8 @@ class InstaBot:
 
                 click_on(click_duration = random.uniform(0.1, 0.3))
 
-                print(f"Post liked")
                 liked += 1
+                log(f"Post liked [{liked}/{amount}]")
 
                 x = location[0] + random.randint(80, 300)
                 y = location[1] - random.randint(150, 300)
@@ -318,7 +320,7 @@ class InstaBot:
                 self.cursor.move_to([x, y])
 
             else:
-                print("skipping the post...")
+                log("Feed skipped randomly..")
                 if decision(): # viewing the post 
                     positioned_like_button(location[1], self.height)
                     if is_video:
@@ -333,8 +335,8 @@ class InstaBot:
 
 
             if liked >= amount:
-                print(f"Task completed")
-                print(f"Number of post liked = {liked}")
+                log(f"Task Completed : Like reels")
+                log(f"Number of reels liked = {liked}")
                 break
 
 
