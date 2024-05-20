@@ -42,12 +42,12 @@ class InstaBot:
 
     def reels_window(self):
         #chek if reels winow is already opend
-        location = locate(images.reels.on_reels_btn)
+        location = locate(images.reels.on_reels_btn, confidence= 0.8)
         if location:
-            log("Reels window is already open..")
+            log("Reels window is already open....")
             return True
         
-        location = locate(images.reels.reels_btn)
+        location = locate(images.reels.reels_btn, confidence= 0.8)
         if not location:
             raise ValueError("Reels Icon not found....")
         
@@ -58,8 +58,8 @@ class InstaBot:
         sleep(random.uniform(0.1, 0.4))
         click_on(click_duration = random.uniform(0.1, 0.2))
 
-        x = location[0] + random.randint(80, 200)
-        y = location[1] + random.randint(20, 60)
+        x = location[0] + random.randint(350, 550)
+        y = location[1] + random.randint(80, 160)
         sleep(random.uniform(0.3, 0.8))
 
         self.cursor.move_to([x, y])
@@ -188,7 +188,7 @@ class InstaBot:
         sleep(random.uniform(0.8, 3))
 
 
-        while liked <= amount:
+        while liked < amount:
             #scroll reels
             scroll = random.randrange(60,200, 10)
             pyautogui.scroll(-abs(scroll))
@@ -267,7 +267,7 @@ class InstaBot:
 
     def like_feed(self, amount = 5):
         liked = 0
-        # self.open_instagram()
+        self.home_window()
 
         while True:
             scroll = random.randrange(140,260, 10)
@@ -339,7 +339,39 @@ class InstaBot:
                 log(f"Number of reels liked = {liked}")
                 break
 
+    def home_window(self):
+        #chek if reels winow is already opend
+        location = locate(images.home.on_home_btn, confidence= 0.8)
+        if location:
+            log("Home window is already open..")
+            return True
+        
+        location = locate(images.home.home_btn, confidence= 0.8)
+        if not location:
+            raise ValueError("Home Icon not found....")
+        
+        x = random.randint(1, 8)
+        y = random.randint(1, 10)
+        self.cursor.move_to([location[0]-x, location[1]+y])
 
+        sleep(random.uniform(0.1, 0.4))
+        click_on(click_duration = random.uniform(0.1, 0.2))
+
+        x = location[0] + random.randint(350, 550)
+        y = location[1] + random.randint(80, 160)
+        sleep(random.uniform(0.3, 0.8))
+
+        self.cursor.move_to([x, y])
+        return True
+    
+    def move_cursor_to_page(self, location):
+        x = location[0] + random.randint(350, 550)
+        y = location[1] + random.randint(80, 160)
+        sleep(random.uniform(0.3, 0.8))
+        self.cursor.move_to([x, y])
+
+        return True
+    
 
     def open_instagram(self) -> bool:
         already_open = self.is_instgram()
@@ -359,8 +391,16 @@ class InstaBot:
     def is_instgram(self) -> bool:
         #check the instagram logo on the screen
         #to make sure that instagram is open
-        location = locate(images.home.logo)
+
+        location = locate(images.home.logo_full, confidence= 0.8)
         if location:
+            self.move_cursor_to_page(location)
+            return True
+        
+        #minimized window logo
+        location = locate(images.home.logo, confidence= 0.8)
+        if location:
+            self.move_cursor_to_page(location)
             return True
         
         return False
@@ -368,19 +408,28 @@ class InstaBot:
 
 if __name__ == "__main__":
     insta = InstaBot()
+    sleep(4)
 
-    for i in range(10):
+    for i in range(4):
         insta.open_instagram()
         sleep(random.uniform(1,3))
 
-        insta.like_feed(random.randint(5, 15))
-        sleep(random.uniform(2,8))
+        insta.like_feed(random.randint(1, 3))
+        sleep(random.uniform(2,6))
 
-        insta.like_reels(random.randint(20, 40))
+        insta.like_reels(random.randint(1, 3))
         sleep(random.uniform(2,5))
+
+
+        insta.like_feed(random.randint(1, 3))
+        sleep(random.uniform(2,6))
+
+        insta.like_reels(random.randint(1, 3))
+        sleep(random.uniform(2,5))
+
         insta.close_instagram()
 
-        shutdown_time = random.randrange(20, 60) * 60
+        shutdown_time = random.randrange(2, 6) 
         log(f"======> Shutdown for {convert_time(shutdown_time)}")
         sleep(shutdown_time)
     

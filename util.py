@@ -40,7 +40,7 @@ def positioned_like_button(loc_y, height):
     on_height = random.randrange(min_height, max_height, 5)
 
     scroll_unit = on_height - loc_y
-    print(f"Scroll => {scroll_unit} and on_height={on_height}  and y={loc_y}")
+    # print(f"Scroll => {scroll_unit} and on_height={on_height}  and y={loc_y}")
 
     while  scroll_unit > 0:
         if scroll_unit < 40:
@@ -120,7 +120,7 @@ def next_feed(scroll_unit):
             new_unit = random.randrange(100, scroll_unit, 20)
 
         scroll_unit -= new_unit
-        print(f"New==> {-abs(new_unit)}")
+        # print(f"New==> {-abs(new_unit)}")
         pyautogui.scroll(int(-abs(new_unit)))
         sleep_second = f"0.{random.randrange(1,9)}"
         time.sleep(float(sleep_second))
