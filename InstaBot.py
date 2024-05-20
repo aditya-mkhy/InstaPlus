@@ -34,6 +34,11 @@ class InstaBot:
         #humazine mouse 
         self.cursor = SystemCursor()
 
+        self.reels_share_profile = {}
+
+    def close_instagram(self):
+        pyautogui.hotkey('ctrl', 'w')
+
     def reels_window(self):
         #chek if reels winow is already opend
         location = locate(images.reels.on_reels_btn)
@@ -73,23 +78,83 @@ class InstaBot:
         pyautogui.click()
         sleep(random.uniform(1, 1.5))
 
-        suggested_label = locate(images.reels.suggest_lbl)
+        suggested_label = locate(images.reels.suggest_lbl, confidence= 0.8)
         if not suggested_label:
             sleep(random.uniform(1, 2))
-            suggested_label = locate(images.reels.suggest_lbl)
+            suggested_label = locate(images.reels.suggest_lbl, confidence= 0.7)
             if not suggested_label:
                 print("suggested_label not found")
                 return
         
         if name:
-            pyautogui.write(name, interval=0.321)
-            sleep(random.uniform(1, 2))
-            y = suggested_label[1] + random.randint(8, 60)
 
+            profile = self.reels_share_profile.get(name)
+            is_scrolled = False
+
+            if profile:
+                print(f"Profile Found")
+                x = suggested_label[0] + random.randint(50,250)
+                y = suggested_label[1] - random.randint(1, 5)
+                sleep(random.uniform(0.1, 0.6))
+                self.cursor.move_to([x, y])
+                sleep(random.uniform(0.1, 0.5))
+
+                prof_location = None
+                is_scrolled = True
+                for i in range(5):
+                    prof_location = locate(profile, confidence= 0.7)
+                    if prof_location:
+                        break
+                        
+                    pyautogui.scroll(-(random.randrange(60, 120)))
+                    sleep(random.uniform(0.1, 0.7))
+                
+                if prof_location:
+                    x = prof_location[0] + random.randint(10,100)
+                    y = prof_location[1] + random.randint(1, 5)
+
+                    sleep(random.uniform(0.1, 0.3))
+                    self.cursor.move_to([x, y])
+
+                else:
+                    print("can't find the profile after scrolling")
+                    profile = None
+
+            if not profile:
+                print("not profile")
+
+                if is_scrolled:
+                    # clicking on "To:" input box
+                    x = suggested_label[0] + random.randint(1, 10)
+                    y = suggested_label[1] + random.randint(48, 75)
+                    sleep(random.uniform(0.1, 0.6))
+                    self.cursor.move_to([x, y])
+                    sleep(random.uniform(0.1, 0.3))
+                    pyautogui.click()
+
+                #enter name in input box
+                pyautogui.write(name, interval=0.321)
+                sleep(random.uniform(2, 3))
+
+                x = suggested_label[0] - 45
+                y = suggested_label[1] + 10
+                x2 = 100
+                y2 = 35
+
+                region = (int(x), int(y), x2, y2)
+                img = pyautogui.screenshot(region = region)
+
+                self.reels_share_profile[name] = img
+                log(f"---> {name}'s  profile pic saved")
+
+                y = suggested_label[1] + random.randint(8, 60)
+                x = suggested_label[0] + random.randint(10, 300)
+                
         else:
+            print("No name is given, so sedning to first person")
             y = suggested_label[1] + random.randint(40, 100)
+            x = suggested_label[0] + random.randint(10, 300)
 
-        x = suggested_label[0] + random.randint(10, 300)
         self.cursor.move_to([x, y])
         sleep(random.uniform(0.1, 0.3))
 
@@ -252,8 +317,6 @@ class InstaBot:
 
                 self.cursor.move_to([x, y])
 
-                liked += 1
-
             else:
                 print("skipping the post...")
                 if decision(): # viewing the post 
@@ -303,7 +366,21 @@ class InstaBot:
 
 if __name__ == "__main__":
     insta = InstaBot()
-    insta.like_feed(5)
-    sleep(68)
-    insta.like_reels(20)
+
+    for i in range(10):
+        insta.open_instagram()
+        sleep(random.uniform(1,3))
+
+        insta.like_feed(random.randint(5, 15))
+        sleep(random.uniform(2,8))
+
+        insta.like_reels(random.randint(20, 40))
+        sleep(random.uniform(2,5))
+        insta.close_instagram()
+
+        shutdown_time = random.randrange(20, 60) * 60
+        log(f"======> Shutdown for {convert_time(shutdown_time)}")
+        sleep(shutdown_time)
     
+    os.system("shutdown /h")
+
