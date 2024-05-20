@@ -7,8 +7,15 @@ import random
 from PIL import Image
 from humancursor import SystemCursor
 import images
+from datetime import datetime
 
 cursor = SystemCursor()
+
+def log(*args):
+    print(f" INFO [{datetime.now().strftime('%d-%m-%Y  %H:%M:%S')}] ", end="")
+    for arg in args:
+        print(arg, end=" ")
+    print("")
 
 def locate(*args, **kwargs):
     try:
@@ -119,9 +126,19 @@ def next_feed(scroll_unit):
         time.sleep(float(sleep_second))
 
 
+def convert_time(sec: int):
+    if sec < 60:
+        return f"{sec} Sec"
+    elif sec < 3600:
+        return f"{sec//60}:{ str(sec%60)[:2]} Mint"
+    elif sec < 216000:
+        return f"{sec//3600}:{ str(sec%3600)[:2]} Hrs"
+    elif sec < 12960000:
+        return f"{sec//216000}:{ str(sec%216000)[:2]} Days"
+    else:
+        return "Error"
 
 if __name__ == "__main__":
     # un_mute()
-    st = is_mute()
-    print("st==> ", st)
+    log("Heyk",435, "jdfke", log)
 

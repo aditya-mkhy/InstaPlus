@@ -8,6 +8,7 @@ from PIL import Image
 from humancursor import SystemCursor
 import images
 from util import locate, decision, is_video, positioned_like_button, is_mute, mute, un_mute, click_on, next_feed
+from util import convert_time, log
 
 
 
@@ -28,13 +29,178 @@ class InstaBot:
             self.browser_path = None
             self.browser = web
 
+        self.friends = [ "Lakshay Saini", "ik"]
+
         #humazine mouse 
         self.cursor = SystemCursor()
+
+    def reels_window(self):
+        #chek if reels winow is already opend
+        location = locate(images.reels.on_reels_btn)
+        if location:
+            log("Reels window is already open..")
+            return True
+        
+        location = locate(images.reels.reels_btn)
+        if not location:
+            raise ValueError("Reels Icon not found....")
+        
+        x = random.randint(1, 8)
+        y = random.randint(1, 10)
+        self.cursor.move_to([location[0]-x, location[1]+y])
+
+        sleep(random.uniform(0.1, 0.4))
+        click_on(click_duration = random.uniform(0.1, 0.2))
+
+        x = location[0] + random.randint(80, 200)
+        y = location[1] + random.randint(20, 60)
+        sleep(random.uniform(0.3, 0.8))
+
+        self.cursor.move_to([x, y])
+        return True
+    
+    def send_reel(self, name = None):
+        direct_button = locate(images.reels.direct_btn)
+        if not direct_button:
+            print("Direct Button not found")
+            return
+        x = direct_button[0] - random.randint(1, 10)
+        y = direct_button[1] + random.randint(1, 10)
+
+        self.cursor.move_to([x, y])
+
+        sleep(random.uniform(0.1, 0.5))
+        pyautogui.click()
+        sleep(random.uniform(1, 1.5))
+
+        suggested_label = locate(images.reels.suggest_lbl)
+        if not suggested_label:
+            sleep(random.uniform(1, 2))
+            suggested_label = locate(images.reels.suggest_lbl)
+            if not suggested_label:
+                print("suggested_label not found")
+                return
+        
+        if name:
+            pyautogui.write(name, interval=0.321)
+            sleep(random.uniform(1, 2))
+            y = suggested_label[1] + random.randint(8, 60)
+
+        else:
+            y = suggested_label[1] + random.randint(40, 100)
+
+        x = suggested_label[0] + random.randint(10, 300)
+        self.cursor.move_to([x, y])
+        sleep(random.uniform(0.1, 0.3))
+
+        pyautogui.click()
+        sleep(random.uniform(0.8, 2))
+
+        write_msg_lbl = locate(images.reels.write_msg_lbl, confidence= 0.8 )
+        if not write_msg_lbl:
+            sleep(random.uniform(2, 3))
+            write_msg_lbl = locate(images.reels.write_msg_lbl , confidence= 0.8)
+            if not write_msg_lbl:
+                print("Not found label")
+                return 
+
+
+        x = write_msg_lbl[0] + random.randint(10, 200)
+        y = write_msg_lbl[1] + random.randint(50, 80)
+        self.cursor.move_to([x, y])
+        sleep(random.uniform(0.4, 0.9))
+        pyautogui.click()
+
+        return True
+
+        
+    def like_reels(self, amount = 5, do_comment = False, do_share = False, save_post = False):
+        liked = 0
+        is_cursor_on_reel = False
+        sleep(5)
+        self.reels_window()
+        sleep(random.uniform(0.8, 3))
+
+
+        while liked < amount:
+            #scroll reels
+            scroll = random.randrange(60,200, 10)
+            pyautogui.scroll(-abs(scroll))
+            sleep(random.uniform(1, 3))
+
+
+            location = locate(images.reels.like, region=(200, 0, self.width, self.height))
+            if not location:
+                log("Like-button-not-found...")
+                continue
+
+            if decision(): #like or not reel
+
+                #watching the reelk
+                watch_time = random.randrange(10, 30, 1)
+                log(f"Watching reel for {convert_time(watch_time)}")
+                sleep(watch_time)
+
+                # random location on like button
+                x = random.randint(1, 8)
+                y = random.randint(1,10)
+                self.cursor.move_to([location[0]-x, location[1]+y])
+
+                sleep(random.uniform(0.1, 0.9))
+
+                click_on(click_duration = random.uniform(0.1, 0.3))
+
+                log(f"Post liked")
+                liked += 1
+
+                if True:
+                    name = random.choice(self.friends)
+                    st = self.send_reel(name=name)
+                    if st:
+                        log(f"Reel sendt to -> {name}")
+
+                # move cursor from like button
+                if decision():# move on the reel
+                    x = location[0] - random.randint(180, 400)
+                    y = location[1] + random.randint(10, 200)
+                    is_cursor_on_reel = True
+
+                else:# movve away from the reel
+                    x = location[0] + random.randint(40, 200)
+                    y = location[1] + random.randint(20, 200)
+                    is_cursor_on_reel = False
+
+                self.cursor.move_to([x, y])
+                sleep(random.uniform(0.5, 2))
+
+
+            else:
+                log("reel skipped randomly..")
+                if decision():
+                    watch_time = random.randrange(8, 25, 2)
+                else:
+                    watch_time = random.uniform(2, 5)
+                    if decision(): #pause the reel
+                        if is_cursor_on_reel: # pause by left click
+                            pyautogui.click()
+                            print(f"Pause by click")
+                        else:
+                            print(f"Pause by pause button")
+                            pyautogui.press('playpause')
+
+                log(f" Watching reel for {convert_time(watch_time)} (Not liking)")
+                sleep(watch_time)
+
+
+
+        log(f"Task Completed : Like reels")
+        log(f"Number of reels liked = {liked}")
+
 
 
     def like_feed(self, amount = 5):
         liked = 0
-        self.open_instagram()
+        # self.open_instagram()
 
         while True:
             scroll = random.randrange(140,260, 10)
@@ -96,8 +262,8 @@ class InstaBot:
                         view_time = random.randrange(1, 10, 1)
                     else:
                         view_time = random.randrange(1, 3, 1  )
-
                     sleep(view_time)
+
 
                 next_feed(location[1]) # scrolling to next feed
                 sleep(1)
@@ -137,5 +303,7 @@ class InstaBot:
 
 if __name__ == "__main__":
     insta = InstaBot()
-    insta.like_feed(40)
+    insta.like_feed(5)
+    sleep(68)
+    insta.like_reels(20)
     
