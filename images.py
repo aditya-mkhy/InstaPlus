@@ -16,3 +16,13 @@ class reels:
     suggest_lbl = "./data/reels_suggest_label.png"
     send_btn = "./data/reel_send_btn.png"
     write_msg_lbl =  "./data/reels_write_msg_label.png"
+    
+
+class explore:
+    explore_btn = "./data/explore_button.png"
+    on_explore_btn = "./data/on_explore_button.png"
+    next = "./data/explore_next.png"
+    prev = "./data/explore_prev.png"
+    comment_add = "./data/explore_comment_add.png"
+    comment_like = "./data/explore_comment_like.png"
+

@@ -66,12 +66,12 @@ def mute_un_mute(location, check = False):
     return False
 
 def mute(check = False):
-    location = locate(images.home.mute)
+    location = locate(images.home.mute, confidence= 0.75)
     return mute_un_mute(location, check)
 
 
 def un_mute(check = False):
-    location = locate(images.home.un_mute)
+    location = locate(images.home.un_mute, confidence= 0.75)
     return mute_un_mute(location, check)
 
 def is_mute():
@@ -90,12 +90,9 @@ def decision():
     return random.choice([True, False])
 
 
-def is_video(location):
-    x = location[0] + 200
-    y = location[1] - 200
-
-    x2 = x + 10
-    y2 = y + 10
+def content_type(x, y):
+    x2 = x + 15
+    y2 = y + 15
 
     region = (int(x), int(y), int(x2), int(y2))
     img = pyautogui.screenshot(region = region)
