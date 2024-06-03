@@ -2,6 +2,7 @@ class home:
     logo = "./data/insta_logo.png"
     logo_full = "./data/insta_logo_full.png"
     like = "./data/home_like.png"
+    liked = "./data/home_liked.png"
     mute = "./data/home_mute.png"
     un_mute = "./data/home_unmute.png"
     home_btn = "./data/home_button.png"

@@ -43,6 +43,7 @@ class InstaBot:
 
     def explore(self, amount = 5, do_comment = False, like_comments = True, do_share = False, save_post = False):
         liked = 0
+        already_liked = 0
         comment = 0
         comment_liked = 0
         followed = 0
@@ -52,23 +53,49 @@ class InstaBot:
         while liked < amount:
             next_button = locate(images.explore.next, confidence= 0.8)
             if not next_button:
-                raise ValueError("Next button not found...")
+                like_btn = locate(images.home.like, region=(200, 0, self.width, self.height))
+                if not like_btn:
+                    liked_btn = locate(images.home.liked, region=(200, 0, self.width, self.height))
+                    if not liked_btn:
+                        raise ValueError("Next button not found...")
+                
+                sleep(random.uniform(0.6, 1.5))
+                pyautogui.press("right")
+                sleep(random.uniform(0.6, 1.5))
+                log(":::::> Right key is pressed as next button not found...")
 
-            x = next_button[0] + random.randint(2, 5)
-            y = next_button[1] + random.randint(1, 5)
-            self.cursor.move_to([x, y])
-            sleep(random.uniform(0.1, 0.5))
-            pyautogui.click(interval=random.uniform(0.1, 0.2))
-            sleep(random.uniform(0.6, 1.5))
+            
+            else:
+                
+                if decision():# press right key to get next post
+                    log(":::::> Right key is pressed...")
+                    pyautogui.press("right")
+                    sleep(random.uniform(0.6, 1.5))
+
+
+                else:
+                    x = next_button[0] + random.randint(2, 5)
+                    y = next_button[1] + random.randint(1, 5)
+                    self.cursor.move_to([x, y])
+                    sleep(random.uniform(0.1, 0.5))
+                    pyautogui.click(interval=random.uniform(0.1, 0.2))
+                    sleep(random.uniform(0.6, 1.5))
 
             
             
 
             like_btn = locate(images.home.like, region=(200, 0, self.width, self.height))
             if not like_btn:
-                print("Like-button-not-found...")
+                liked_btn = locate(images.home.liked, region=(200, 0, self.width, self.height))
+                if liked_btn:
+                    log("Post is already visited...")
+                    already_liked += 1
+
+                else:
+                    log("Like button not found...")
                 sleep(random.uniform(0.2, 0.8))
                 continue
+
             x = like_btn[0] - 200
             y = like_btn[1] - 100
             is_video = content_type(x, y)
@@ -102,8 +129,9 @@ class InstaBot:
 
                 if decision() and like_comments:# like comments
                     commnet_like_amout = random.randint(2, 10)
-                    comment_liked = self.like_comments(like_btn, amount=commnet_like_amout)
-                    log(f"Total comment liked -> {comment_liked} ")
+                    comment_liked_of_this  = self.like_comments(like_btn, amount=commnet_like_amout)
+                    comment_liked += comment_liked_of_this
+                    log(f"Total comment liked -> {comment_liked_of_this} ")
 
                 else:
                     log("Skipping commnets like...")
@@ -126,6 +154,11 @@ class InstaBot:
 
                 log(f"Watching post for {convert_time(watch_time)} (not liking)")
                 sleep(watch_time)
+
+        log(f"Task Completed : Explore")
+        log(f"Number of post liked = {liked}")
+        log(f"Number of post already liked = {already_liked}")
+        log(f"Number of comments liked = {comment_liked}")
 
 
                     
@@ -364,7 +397,7 @@ class InstaBot:
         return True
 
         
-    def like_reels(self, amount = 5, do_comment = False, do_share = False, save_post = False):
+    def like_reels(self, amount = 5, do_comment = False, do_share = True, save_post = False):
         liked = 0
         is_cursor_on_reel = False
         sleep(5)
@@ -404,7 +437,7 @@ class InstaBot:
                 log(f"Post liked [{liked}/{amount}]")
 
 
-                if decision():
+                if decision() and do_share:
                     name = random.choice(self.friends)
                     st = self.send_reel(name=name)
                     if st:
@@ -503,6 +536,7 @@ class InstaBot:
 
                 self.cursor.move_to([x, y])
 
+                log("This is the best boy  of the shcool is the best than man of thebook")
             else:
                 log("Feed skipped randomly..")
                 if decision(): # viewing the post 
@@ -604,13 +638,13 @@ class InstaBot:
         #check the instagram logo on the screen
         #to make sure that instagram is open
 
-        location = locate(images.home.logo_full, confidence= 0.8)
+        location = locate(images.home.logo_full, confidence= 0.7)
         if location:
             self.move_cursor_to_page(location)
             return True
         
         #minimized window logo
-        location = locate(images.home.logo, confidence= 0.8)
+        location = locate(images.home.logo, confidence= 0.7)
         if location:
             self.move_cursor_to_page(location)
             return True
@@ -624,16 +658,26 @@ if __name__ == "__main__":
 
     sleep(4)
 
-    insta.explore(amount=20)
+    # insta.like_feed(random.randint(2, 4))
+    # insta.like_reels(random.randint(25, 50))
+    insta.explore(amount=random.randint(100, 300))
+    insta.close_instagram()
 
-    # for i in range(4):
-    #     insta.open_instagram()
-    #     sleep(random.uniform(1,3))
+    # while True:
+    #     try:
+    #         insta.open_instagram()
+    #         sleep(random.uniform(1,3))
 
-    #     insta.like_feed(random.randint(5, 20))
-    #     insta.like_reels(random.randint(15, 30))
-
-    #     insta.close_instagram()
+    #         insta.like_feed(random.randint(2, 5))
+    #         sleep(random.uniform(2,10))
+    #         insta.explore(amount=random.randint(100, 300))
+    #         sleep(random.uniform(2,3))
+    #         insta.like_reels(random.randint(2, 10), do_share=False)
+    #         sleep(random.uniform(20,30))
+    #         
+    #     except Exception as e:
+    #         print(f"err0 ==> {e}")
+    
 
     #     shutdown_time = random.randrange(20, 60) * 60
     #     log(f"======> Shutdown for {convert_time(shutdown_time)}")
