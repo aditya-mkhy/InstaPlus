@@ -5,6 +5,7 @@ __pycache__/
 
 #test file
 test.py
+InstaBotPrev.py
 # C extensions
 *.so
 
