@@ -3,7 +3,6 @@ import os
 import pathlib
 import pyautogui
 from PIL import Image
-import images
 from util import *
 from carousel import carousel
 from tools import open_explore, search_hashtag, search_user
@@ -39,7 +38,7 @@ class InstaPlus:
 
         if info:
             sleep_uniform(0.1, 0.2)
-            log("--------Like_by_feed task finished----------------------")
+            log("--------Like_by_feed task finished-----------------")
             log(f"Post Liked : {info['liked']}")
             log(f"Numer of Comments : {info['comment']}")
             log(f"Comments liked  : {info['comment_liked']}")
@@ -103,7 +102,7 @@ class InstaPlus:
             except Exception as e:
                 log(f"Hashtag [{tag}] Search Error : {e}")
 
-            sleep_uniform(2, 8)
+            sleep_uniform(30, 80)
 
         # information
         sleep_uniform(0.1, 0.2)
@@ -154,36 +153,24 @@ class InstaPlus:
         
 if __name__ == "__main__":
     instaBot = InstaPlus()
-    tags = [ "#snow", "#ironman", "#waterfall",]
+    tags = ["#snow", "#ironman", "#waterfall",]
 
-    hashtags = [
-    "#travel",
-    "#nature",
-    "#fitness",
-    "#food",
-    "#art",
-    "#selfie",
-    "#ootd",
-    "#motivation",
-    "#explore",
-    "#beautiful",
-    "#instadaily",
-    "#tbt",
-    "#love",
-    "#instalike",
-    "#followme",
-    "#happy",
-    "#fashion",
+    hashtags = ["#adventure", "#naturelover", "#outdoors", "#animals", "#beach", 
+                "#sky", "#wildlife", "#hiking", "#explore"]
+    hashtags2 = ['#likes', '#followback', '#instagram', '#followme', '#love', '#instalike', '#photography', '#followforfollow', '#photooftheday', '#likeforlike', '#picoftheday', '#fashion', '#following']
 
-    ]
-    tags = [ "#mahadev", "#spiderman", "#followme"]
 
     users = ["mbg148", "nanuqdogphotography", "signewenneberg", "foto_marek"]
 
-    # instaBot.like_by_feed(amount=10, do_comments=True, do_like_comments=True, randomize=True)
+    # # instaBot.like_by_feed(amount=2, do_comments=True, do_like_comments=True, randomize=True)
 
-    # instaBot.like_by_hashtag(tags=tags, amount=2, do_comments=True, do_like_comments=True, randomize=False)
-    instaBot.explore(amount=5, do_comments=True, do_like_comments=False, randomize=False)
+    # instaBot.like_by_hashtag(tags=hashtags, amount=50, do_comments=True, do_like_comments=False, randomize=False)
+    # # sleep(60*1)
+
+    instaBot.explore(amount=400, do_comments=True, do_like_comments=True, randomize=False)
+    sleep(60*2)
+    os.system("shutdown /h")
+    # instaBot.like_by_hashtag(tags=hashtags2, amount=30, do_comments=True, do_like_comments=True, randomize=False)
 
 
 

@@ -244,7 +244,6 @@ def search_user(query):
 if __name__ == "__main__":
 
 
-    user = "_aman._.kumar_" #"nanuqdogphotography" #
     sleep(2)
 
     refresh_btn = locate_until(images.carousel.save_btn, confidence= 0.93, timeout= 10)

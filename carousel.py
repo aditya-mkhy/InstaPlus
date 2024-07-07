@@ -27,6 +27,7 @@ def carousel(amount = 5, do_comments = True, do_like_comments = True, randomize 
     comment_liked = 0
     is_comment_box_focus = False
     text_comments_obj = TextComments()
+    already_liked_continuity = 0
 
     while True:
 
@@ -38,6 +39,7 @@ def carousel(amount = 5, do_comments = True, do_like_comments = True, randomize 
             y = like_btn[1] - 200
             sleep_uniform(0.5, 0.9)
             is_video = content_type(x, y)# if the post is photo or video
+            already_liked_continuity = 0
 
             if decision(most=True) or not randomize:#like or not
                 if is_video:
@@ -135,9 +137,16 @@ def carousel(amount = 5, do_comments = True, do_like_comments = True, randomize 
             if liked_btn:
                 log("Post is already visited...")
                 already_liked += 1
+                already_liked_continuity += 1
+
+                if already_liked_continuity > 10:
+                    log("All the post in this carousel is already visited....")
+                    close_carousel()
+                    break
 
             else:
                 log("Like button not found...")
+                already_liked_continuity = 0
             sleep_uniform(0.1, 0.4)
 
         if liked >= amount:
@@ -307,10 +316,7 @@ def read_comments(like_pos, from_y):
         for emoji in img:
             emoji_loc = locate(img[emoji], confidence= 0.93, region=(from_x, from_y, to_x, to_y))
             if not emoji_loc:
-                print(f"Image not found : {emoji}")
                 continue
-
-            log(f"{emoji} -- emoji is found :  at {emoji_loc}")
             
             if found.get("emoji"):
                 found[emoji] += 1
@@ -323,7 +329,7 @@ def read_comments(like_pos, from_y):
 
 
         if not is_found:
-            log("No comments found....")
+            log("------> No comments found....")
             break
 
     return found
@@ -359,7 +365,6 @@ def emoji_btn_click(comment_emoji, input = False):
 def make_comment(commented_emoji: dict, text_comments_obj : TextComments):
     emoji_btn = { "heart" : images.comments_emoji.heart, "fire" : images.comments_emoji.fire, "laugh" : images.comments_emoji.laugh,
                  "heart_eye" : images.comments_emoji.heart_eye}
-                 
     
     no_of_emoji = 2
     

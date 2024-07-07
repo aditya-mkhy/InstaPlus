@@ -214,5 +214,5 @@ def feed_comment(do_like_comments = True, randomize = True,  save_post = False):
 
 if __name__ == "__main__":
     sleep(2)
-    info = like_feed(5, do_comments=True, do_like_comments=True, randomize=False)
+    info = like_feed(20, do_comments=True, do_like_comments=True, randomize=False)
     print(f"Info ==> {info}")

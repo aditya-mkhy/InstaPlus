@@ -9,13 +9,27 @@ from humancursor import SystemCursor
 import images
 from datetime import datetime
 from time import sleep
+import os
 
 cursor = SystemCursor()
+from pathlib import Path
+
 
 WIDTH, HEIGHT =  pyautogui.size()
+LOG_PATH = f"{Path.home().as_posix()}/Desktop/log.txt"
+if not os.path.exists(LOG_PATH):
+    LOG_PATH = None
+
 
 def log(*args, **kwargs):
     print(f" INFO [{datetime.now().strftime('%d-%m-%Y  %H:%M:%S')}] ", *args, **kwargs)
+    if LOG_PATH:
+        try:
+            with open(LOG_PATH, "a") as tf:
+                tf.write(f" INFO [{datetime.now().strftime('%d-%m-%Y  %H:%M:%S')}] { ' '.join(args)}\n")
+        except Exception as e:
+            print(f"Error[log] ---> {e}")
+        
 
 
 def decision(most = None):
