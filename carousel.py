@@ -20,11 +20,12 @@ def close_carousel():
 
 
 
-def carousel(amount = 5, do_comments = True, do_like_comments = True, randomize = True,  save_post = False):
+def carousel(amount = 5, do_comments = True, do_like_comments = True, randomize = True, follow = True, save_post = False):
     liked = 0
     already_liked = 0
     total_comment = 0
     comment_liked = 0
+    followed = 0
     is_comment_box_focus = False
     text_comments_obj = TextComments()
     already_liked_continuity = 0
@@ -40,6 +41,8 @@ def carousel(amount = 5, do_comments = True, do_like_comments = True, randomize 
             sleep_uniform(0.5, 0.9)
             is_video = content_type(x, y)# if the post is photo or video
             already_liked_continuity = 0
+
+            follow_decision = ((decision(most=False) and follow) and  locate(images.carousel.follow,  confidence= 0.8))
 
             if decision(most=True) or not randomize:#like or not
                 if is_video:
@@ -95,7 +98,10 @@ def carousel(amount = 5, do_comments = True, do_like_comments = True, randomize 
 
                 if (decision(most=True) and do_comments)  or (not randomize and do_comments):# comments or not 
                     log("Trying to comment...")
-                    commnet_like_amout = random.randint(1, 2)
+                    if follow_decision:
+                        commnet_like_amout = random.randint(1, 8)
+                    else:
+                        commnet_like_amout = random.randint(1, 3)
 
                     no_comment_liked, commented_emoji = like_comments(like_btn, amount=commnet_like_amout, do_like=is_like_comment)
                     comment_liked += no_comment_liked
@@ -114,7 +120,18 @@ def carousel(amount = 5, do_comments = True, do_like_comments = True, randomize 
                     log("Skipping commnets")
                     is_comment_box_focus = False
 
-            
+                
+                if follow_decision:
+                    follow_btn = like_btn = locate(images.carousel.follow,  confidence= 0.8)
+                    if follow_btn:
+                        log("Trying to follow the user")
+                        sleep_uniform(0.6, 1.5)
+                        click_btn(follow_btn, 0, 10, 0, 3)
+                        sleep_uniform(1.5, 3)
+                        log("User is now following...")
+                    else:
+                        log(f"Follow Button not found....")
+
             else:
                 if is_video:
                     log(f"------> This is a video....")
@@ -195,7 +212,7 @@ def carousel(amount = 5, do_comments = True, do_like_comments = True, randomize 
                 click_btn(next_btn, 1, 10, 1, 10) # next post
                 sleep(random.uniform(0.6, 1.5))
 
-    return {"liked" : liked, "already_liked" : already_liked,  "comment_liked" : comment_liked, "comment" : total_comment}
+    return {"liked" : liked, "already_liked" : already_liked,  "comment_liked" : comment_liked, "comment" : total_comment, "followed": followed}
 
 
 def like_comments(like_btn, amount = 5, do_like = True):

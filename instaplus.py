@@ -48,7 +48,7 @@ class InstaPlus:
 
 
     def explore(self, amount = 5, do_comments = True, do_like_comments = False, randomize = True,  save_post = False ):
-        info = {"liked" : 0, "already_liked" : 0, "comment" : 0, "comment_liked" : 0}
+        info = {"liked" : 0, "already_liked" : 0, "comment" : 0, "comment_liked" : 0, "followed": 0}
 
         st = open_explore()
         if not st:
@@ -69,6 +69,7 @@ class InstaPlus:
             log(f"Post Already Liked  : {info['already_liked']}")
             log(f"Numer of Comments : {info['comment']}")
             log(f"Comments liked  : {info['comment_liked']}")
+            log(f"Following  : {info['followed']}")
             log("---------------------------------------------------")
         else:
             log("An error occured during Explore task.")

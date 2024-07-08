@@ -50,6 +50,7 @@ class carousel:
     emoji_most_popular_lbl =  "./data/carousel_emoji_most_popular_lbl.png"
     three_dot =  "./data/carousel_three_dot.png"
     save_btn =  "./data/carousel_save_btn.png"
+    follow = "./data/carousel_follow.png"
 
 class comments_read:
     heart = "./data/comm/read_heart.png"
