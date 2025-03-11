@@ -71,6 +71,7 @@ class search:
     recent_label = "./data/search_recent_label.png"
     close_btn = "./data/search_close_btn.png"
     top_post_label = "./data/search_top_post_label.png"
+    hash_tag = "./data/hash.png"
     posts_label = "./data/search_posts_label.png"
     no_post_yet_label = "./data/search_no_post_yet_label.png"
 
@@ -89,4 +90,4 @@ def get_read_emoji( except_emoji = list):
         if not emoji in except_emoji:
             find[emoji] = READ_EMOJI[emoji]
         
-    return find
+    return

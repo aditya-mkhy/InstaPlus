@@ -20,7 +20,7 @@ def close_carousel():
 
 
 
-def carousel(amount = 5, do_comments = True, do_like_comments = True, randomize = True, follow = True, save_post = False):
+def carousel(amount = 5, do_comments = True, do_like_comments = True, randomize = True, follow = False, save_post = False):
     liked = 0
     already_liked = 0
     total_comment = 0
@@ -30,188 +30,194 @@ def carousel(amount = 5, do_comments = True, do_like_comments = True, randomize 
     text_comments_obj = TextComments()
     already_liked_continuity = 0
 
-    while True:
+    try:
+        
+        while True:
 
-        like_btn = locate(images.home.like, region=(200, 0, WIDTH - 200, HEIGHT))
+            like_btn = locate(images.home.like, region=(200, 0, WIDTH - 200, HEIGHT))
 
-        if  like_btn:
-           
-            x = like_btn[0] - 200
-            y = like_btn[1] - 200
-            sleep_uniform(0.5, 0.9)
-            is_video = content_type(x, y)# if the post is photo or video
-            already_liked_continuity = 0
+            if  like_btn:
+            
+                x = like_btn[0] - 200
+                y = like_btn[1] - 200
+                sleep_uniform(0.5, 0.9)
+                is_video = content_type(x, y)# if the post is photo or video
+                already_liked_continuity = 0
 
-            follow_decision = ((decision(most=False) and follow) and  locate(images.carousel.follow,  confidence= 0.8))
+                follow_decision = ((decision(most=False) and follow) and  locate(images.carousel.follow,  confidence= 0.8))
 
-            if decision(most=True) or not randomize:#like or not
-                if is_video:
-                    log(f"------> This is a video....")
-                    watch_time = random.randrange(8, 20, 1)
-                    if is_mute():
-                        log(f"------> Video is muted")
-                        s = un_mute()
-                        log(f"------> Now, it is unmute")
+                if decision(most=True) or not randomize:#like or not
+                    if is_video:
+                        log(f"------> This is a video....")
+                        watch_time = random.randrange(6, 20, 1)
+                        if is_mute():
+                            log(f"------> Video is muted")
+                            s = un_mute()
+                            log(f"------> Now, it is unmute")
 
-                else:
-                    log(f"------> This is a photo")
-                    watch_time = random.randrange(2, 8, 1)
-                    
-                log(f"Watching post for {convert_time(watch_time)}")
-                sleep(watch_time)
+                    else:
+                        log(f"------> This is a photo")
+                        watch_time = random.randrange(2, 4, 1)
+                        
+                    log(f"Watching post for {convert_time(watch_time)}")
+                    sleep(watch_time)
 
-                #like the post
+                    #like the post
 
-                move_to(like_btn, 0, 6, 0, 6)
-                like_btn2 = locate(images.home.like, region=(200, 0, WIDTH - 200, HEIGHT))
-                if not like_btn2:
-                    log("Some Popup cover the like button")
-
-                    # moving cursor on post
-                    move_to(like_btn, 140, 180, 10, 15, x_opr = "-", y_opr = "-")
-                    sleep_uniform(0.8, 1.5)
-
+                    move_to(like_btn, 0, 6, 0, 6)
                     like_btn2 = locate(images.home.like, region=(200, 0, WIDTH - 200, HEIGHT))
                     if not like_btn2:
-                        next_btn = locate(images.carousel.next, confidence= 0.8)
-                        if not next_btn:
-                            #error
-                            log("Still not find Like or Next button, maybe this one is last.")
-                            break
+                        log("Some Popup cover the like button")
 
-                        click_btn(next_btn, 1, 4, 1, 4)
-                        sleep_uniform(1, 2)
-                        continue
+                        # moving cursor on post
+                        move_to(like_btn, 140, 180, 10, 15, x_opr = "-", y_opr = "-")
+                        sleep_uniform(0.8, 1.5)
+
+                        like_btn2 = locate(images.home.like, region=(200, 0, WIDTH - 200, HEIGHT))
+                        if not like_btn2:
+                            next_btn = locate(images.carousel.next, confidence= 0.8)
+                            if not next_btn:
+                                #error
+                                log("Still not find Like or Next button, maybe this one is last.")
+                                break
+
+                            click_btn(next_btn, 1, 4, 1, 4)
+                            sleep_uniform(1, 2)
+                            continue
+                        
+                        move_to_unhumaize(like_btn2, 0, 6, 0, 6)
+
+
+                    sleep_uniform(0.1, 0.4)
+                    pyautogui.click()
+
+
+                    liked += 1
+                    log(f"Post liked [{liked}/{amount}]")
+
+                    # like comment or not
+                    is_like_comment = (decision(most=False) and do_like_comments) or (not randomize and do_like_comments)
+
+                    if (decision(most=True) and do_comments)  or (not randomize and do_comments):# comments or not 
+                        log("Trying to comment...")
+                        if follow_decision:
+                            commnet_like_amout = random.randint(2, 8)
+                        else:
+                            commnet_like_amout = random.randint(2, 4)
+
+                        no_comment_liked, commented_emoji = like_comments(like_btn, amount=commnet_like_amout, do_like=is_like_comment)
+                        comment_liked += no_comment_liked
+
+                        log(f"Total comment liked -> {no_comment_liked} ")
+
+                        if commented_emoji == {}:
+                            log("No emoji is found in comments..")
+                        else:
+                            log("Try to comment on post")
+                            commented, is_comment_box_focus = make_comment(commented_emoji, text_comments_obj)
+                            total_comment += 1
+                            log(f"Commented : {' '.join(commented)}")
+
+                    else:
+                        log("Skipping commnets")
+                        is_comment_box_focus = False
+
                     
-                    move_to_unhumaize(like_btn2, 0, 6, 0, 6)
-
-
-                sleep_uniform(0.1, 0.4)
-                pyautogui.click()
-
-
-                liked += 1
-                log(f"Post liked [{liked}/{amount}]")
-
-                # like comment or not
-                is_like_comment = (decision(most=False) and do_like_comments) or (not randomize and do_like_comments)
-
-                if (decision(most=True) and do_comments)  or (not randomize and do_comments):# comments or not 
-                    log("Trying to comment...")
                     if follow_decision:
-                        commnet_like_amout = random.randint(1, 8)
-                    else:
-                        commnet_like_amout = random.randint(1, 3)
-
-                    no_comment_liked, commented_emoji = like_comments(like_btn, amount=commnet_like_amout, do_like=is_like_comment)
-                    comment_liked += no_comment_liked
-
-                    log(f"Total comment liked -> {no_comment_liked} ")
-
-                    if commented_emoji == {}:
-                        log("No emoji is found in comments..")
-                    else:
-                        log("Try to comment on post")
-                        commented, is_comment_box_focus = make_comment(commented_emoji, text_comments_obj)
-                        total_comment += 1
-                        log(f"Commented : {' '.join(commented)}")
+                        follow_btn = like_btn = locate(images.carousel.follow,  confidence= 0.8)
+                        if follow_btn:
+                            log("Trying to follow the user")
+                            sleep_uniform(0.6, 1.5)
+                            click_btn(follow_btn, 0, 10, 0, 3)
+                            sleep_uniform(1.5, 3)
+                            log("User is now following...")
+                        else:
+                            log(f"Follow Button not found....")
 
                 else:
-                    log("Skipping commnets")
-                    is_comment_box_focus = False
-
-                
-                if follow_decision:
-                    follow_btn = like_btn = locate(images.carousel.follow,  confidence= 0.8)
-                    if follow_btn:
-                        log("Trying to follow the user")
-                        sleep_uniform(0.6, 1.5)
-                        click_btn(follow_btn, 0, 10, 0, 3)
-                        sleep_uniform(1.5, 3)
-                        log("User is now following...")
+                    if is_video:
+                        log(f"------> This is a video....")
+                        watch_time = random.randrange(3, 12, 1)
+                        if watch_time > 8:
+                            if decision():
+                                s = mute()
+                                if s:
+                                    log(f"------> Video muted")
+                    
                     else:
-                        log(f"Follow Button not found....")
+                        log(f"------> This is a photo")
+                        watch_time = random.randrange(2, 5, 1)
+
+                    log(f"Watching post for {convert_time(watch_time)} (not liking)")
+                    sleep(watch_time)
 
             else:
-                if is_video:
-                    log(f"------> This is a video....")
-                    watch_time = random.randrange(3, 12, 1)
-                    if watch_time > 8:
-                        if decision():
-                            s = mute()
-                            if s:
-                                log(f"------> Video muted")
-                
+                liked_btn = locate(images.home.liked, region=(200, 0, WIDTH - 200, HEIGHT))
+                if liked_btn:
+                    log("Post is already visited...")
+                    already_liked += 1
+                    already_liked_continuity += 1
+
+                    if already_liked_continuity > 10:
+                        log("All the post in this carousel is already visited....")
+                        close_carousel()
+                        break
+
                 else:
-                    log(f"------> This is a photo")
-                    watch_time = random.randrange(2, 5, 1)
+                    log("Like button not found...")
+                    already_liked_continuity = 0
+                sleep_uniform(0.1, 0.4)
 
-                log(f"Watching post for {convert_time(watch_time)} (not liking)")
-                sleep(watch_time)
+            if liked >= amount:
+                close_carousel()
+                break
 
-        else:
-            liked_btn = locate(images.home.liked, region=(200, 0, WIDTH - 200, HEIGHT))
-            if liked_btn:
-                log("Post is already visited...")
-                already_liked += 1
-                already_liked_continuity += 1
+            # next post.........
+            next_btn = locate(images.carousel.next, confidence= 0.8)
+            if not next_btn:
 
-                if already_liked_continuity > 10:
-                    log("All the post in this carousel is already visited....")
-                    close_carousel()
-                    break
+                # check if the comment emoji is find, wich means this is slider post
+                emoji_btn = locate(images.carousel.comment_emoji, confidence= 0.85)
+                if not emoji_btn:
+                    save_btn = locate(images.carousel.save_btn, confidence= 0.92)
+                    if not save_btn:
+                        #Error 
+                        log("This is not a carousel that's why closing the task..")
+                        break
+                
+                # to know if this this the last post
+                prev_btn = locate(images.carousel.prev, confidence= 0.85)
+                if prev_btn:
+                    move_to(emoji_btn)# beacuse some time while likeing comments tooltip appers on next button
 
-            else:
-                log("Like button not found...")
-                already_liked_continuity = 0
-            sleep_uniform(0.1, 0.4)
-
-        if liked >= amount:
-            close_carousel()
-            break
-
-        # next post.........
-        next_btn = locate(images.carousel.next, confidence= 0.8)
-        if not next_btn:
-
-            # check if the comment emoji is find, wich means this is slider post
-            emoji_btn = locate(images.carousel.comment_emoji, confidence= 0.85)
-            if not emoji_btn:
-                save_btn = locate(images.carousel.save_btn, confidence= 0.92)
-                if not save_btn:
-                    #Error 
-                    log("This is not a carousel that's why closing the task..")
-                    break
-            
-            # to know if this this the last post
-            prev_btn = locate(images.carousel.prev, confidence= 0.85)
-            if prev_btn:
-                move_to(emoji_btn)# beacuse some time while likeing comments tooltip appers on next button
-
-                next_btn = locate(images.carousel.next, confidence= 0.8) #10 both
-                if not next_btn:
-                    log("All post are liked or visited...")
-                    close_carousel()
-                    break
-            
-            # next button not found but posts are available
-            sleep_uniform(0.6, 1.5)
-            pyautogui.press("right")
-            sleep_uniform(0.6, 1.5)
-            log("-----> Right key is pressed as next button not found...")
-        
-        else:
-            
-            if decision(most=False) and (not is_comment_box_focus):# press right key to get next post
-                #if is_comment_box_focus in focus, there is no effect of pressing right key
-                log("------> Right key is pressed...")
+                    next_btn = locate(images.carousel.next, confidence= 0.8) #10 both
+                    if not next_btn:
+                        log("All post are liked or visited...")
+                        close_carousel()
+                        break
+                
+                # next button not found but posts are available
+                sleep_uniform(0.6, 1.5)
                 pyautogui.press("right")
-                sleep(random.uniform(0.6, 1.5))
-
+                sleep_uniform(0.6, 1.5)
+                log("-----> Right key is pressed as next button not found...")
+            
             else:
-                click_btn(next_btn, 1, 10, 1, 10) # next post
-                sleep(random.uniform(0.6, 1.5))
+                
+                if decision(most=False) and (not is_comment_box_focus):# press right key to get next post
+                    #if is_comment_box_focus in focus, there is no effect of pressing right key
+                    log("------> Right key is pressed...")
+                    pyautogui.press("right")
+                    sleep(random.uniform(0.6, 1.5))
 
+                else:
+                    click_btn(next_btn, 1, 10, 1, 10) # next post
+                    sleep(random.uniform(0.6, 1.5))
+
+    except Exception as e:
+        print(f"carousalError : {e}")
+
+        
     return {"liked" : liked, "already_liked" : already_liked,  "comment_liked" : comment_liked, "comment" : total_comment, "followed": followed}
 
 
@@ -318,7 +324,7 @@ def like_comments(like_btn, amount = 5, do_like = True):
 
 
 def read_comments(like_pos, from_y):
-    img = { "heart" : images.comments_read.heart, "fire" : images.comments_read.fire, "laugh" : images.comments_read.laugh,
+    img = { "heart" : images.comments_read.heart, "fire" : images.comments_read.fire,
            "heart_eye" : images.comments_read.heart_eye}
 
     from_x = like_pos[0]
@@ -331,7 +337,7 @@ def read_comments(like_pos, from_y):
         is_found = False
 
         for emoji in img:
-            emoji_loc = locate(img[emoji], confidence= 0.93, region=(from_x, from_y, to_x, to_y))
+            emoji_loc = locate(img[emoji], confidence = 0.94, region = (from_x, from_y, to_x, to_y))
             if not emoji_loc:
                 continue
             
@@ -348,6 +354,8 @@ def read_comments(like_pos, from_y):
         if not is_found:
             log("------> No comments found....")
             break
+    # if found == {}:
+    #      found["heart"] = 2
 
     return found
 
@@ -421,6 +429,8 @@ def make_comment(commented_emoji: dict, text_comments_obj : TextComments):
 
     commented = []
     emoji_count = 0
+    total_emoji = len(commented_emoji)
+
     for emoji in commented_emoji:
 
         if emoji_count == no_of_emoji:
@@ -434,7 +444,11 @@ def make_comment(commented_emoji: dict, text_comments_obj : TextComments):
         move_to(emoji_loc, 1, 10, 1, 10)
         sleep(random.uniform(0.1, 0.3))
 
-        count = random.randint(2, 5)
+        if total_emoji > 1:
+            count = random.randint(1, 2)
+        else:
+            count = random.randint(2, 3)
+
         emoji_count += 1
 
         for i in range(count):
@@ -477,9 +491,8 @@ def make_comment(commented_emoji: dict, text_comments_obj : TextComments):
 
 if __name__ == "__main__":
     sleep(2)
-    # comment_emoji = locate(images.carousel.comment_emoji, confidence= 0.8)
-    # pyautogui.moveTo(comment_emoji[0], comment_emoji[1], duration=0.4)
-    # exit()
-    d = carousel(amount=60, do_comments=True, do_like_comments=True, save_post=False, randomize=False)
-    print(d)
-
+    comment_emoji = locate(images.search.hash_tag, confidence= 0.8)
+    pyautogui.moveTo(comment_emoji[0], comment_emoji[1], duration=0.4)
+    # # exit()
+    # d = carousel(amount=60, do_comments=True, do_like_comments=True, save_post=False, randomize=False)
+    # print(d)

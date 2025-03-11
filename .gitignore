@@ -6,6 +6,8 @@ __pycache__/
 #test file
 test.py
 InstaBotPrev.py
+ai_comment.py
+tempCodeRunnerFile.py
 # C extensions
 *.so
 

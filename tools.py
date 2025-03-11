@@ -9,6 +9,8 @@ import images
 from util import *
 from text_comments import TextComments
 
+
+
 def reload_page(img):
     reload_button = locate(images.home.reload, confidence= 0.9)
     if not reload_button or decision(most=False):
@@ -22,7 +24,7 @@ def reload_page(img):
             log("reload close button not found ")
             sleep_uniform(6, 10)
         else:
-            log("Lose button found...........")
+            log("Close button found...........")
 
     reload_button = locate_until(images.home.reload, confidence= 0.9, timeout=10)
     confirm_img = locate(img, confidence= 0.95) 
@@ -40,6 +42,12 @@ def reload_page(img):
 
 def open_explore():
     #chek if explore window is already opend
+    #to verify that carousal is opend
+    save_btn = locate_until(images.carousel.save_btn, confidence= 0.93, timeout= 10)
+    if save_btn:
+        log("Explore is already opend...")
+        return True
+    
     on_explore = locate(images.explore.on_explore_btn, confidence= 0.9)
     if not on_explore:
         #find explore utton
@@ -100,6 +108,7 @@ def search(query):
 
         #to check 
         close_btn = locate_until(images.search.close_btn, confidence= 0.95, timeout=8)
+        print("clise btn found")
         if not close_btn:
             raise ValueError(f"Close button is also not found...")
         
@@ -117,6 +126,7 @@ def search(query):
         raise ValueError("Recent label not found...")
 
     pyautogui.write(query, interval=random.uniform(0.100, 0.200))
+    print("query written")
 
     close_btn = locate_until(images.search.close_btn, confidence= 0.95, timeout=5)
     if not close_btn:
@@ -135,6 +145,8 @@ def search(query):
     sleep_uniform(0.1, 0.5)
     pyautogui.click()
 
+    print("Clicck on the 1st search...")
+
     return  True
 
 
@@ -144,31 +156,36 @@ def search_hashtag(query, refresh = False):
 
     refresh_btn = locate_until(images.home.reload_error, confidence= 0.95, timeout= 10)
     if refresh_btn:
+        print("Refreshing the page................")
         click_btn(refresh_btn, 1, 10, 1, 10)
         sleep(10)
 
 
-    top_post = locate_until(images.search.top_post_label, confidence= 0.95, timeout= 20)
-    if not top_post:
-        search_on_btn = locate(images.search.search_on_btn, confidence= 0.93)
+    close_btn = locate_until(images.search.close_btn, confidence= 0.9, timeout=5)
+    if  close_btn:
+        print("Close Button Found...This means searh window is still there...")
+        search_on_btn = locate(images.search.search_on_btn, confidence= 0.8)
         if not search_on_btn:
-            raise ValueError("TOP POST label not found....")
-        
+            raise ValueError("Searh btn not found....")
         click_btn(search_on_btn, 1, 5, 1, 5)
-        sleep_uniform(0.5, 1)
+        sleep_uniform(2, 3)
 
-        top_post = locate(images.search.top_post_label, confidence= 0.95)
-        if not top_post:
-            raise ValueError("TOP POST label not found.... 1")
 
-    #referesh
-    if refresh:
-        st = reload_page(images.search.top_post_label)
-        if st:
-            log("Page refreshed sucessfullly...")
-        sleep_uniform(0.5, 1)
+    top_post = locate_until(images.search.hash_tag, confidence= 0.8, timeout= 20)
+    if not top_post:
+        raise ValueError("TopMost hashtag is not found....")
+
+    
+    # #referesh
+    # if refresh:
+    #     st = reload_page(images.search.hash_tag)
+    #     if st:
+    #         log("Page refreshed sucessfullly...")
+    #     sleep_uniform(0.5, 1)
 
     #click on 1st item to open carsousel
+
+    print(top_post)
     click_btn(top_post, 50, 250, 100, 300, x_opr="+", y_opr="+")
 
     save_btn = locate_until(images.carousel.save_btn, confidence= 0.93, timeout= 10)
@@ -238,10 +255,30 @@ def search_user(query):
     
     return False
 
+def shuffle(lst:  list):
+    new_lst = []
+    
+    while lst:
+        elmt = random.choice(lst)
+
+        if decision(most=True):
+            new_lst.append(elmt)
+
+        lst.remove(elmt)
+    
+    return new_lst
+
+
+
         
 
 
 if __name__ == "__main__":
+
+    l = [1,2,3,4,5]
+    s = shuffle(l)
+    print(s)
+    exit()
 
 
     sleep(2)
@@ -255,4 +292,3 @@ if __name__ == "__main__":
 
     # move_to(comment_emoji, 1, 10, 1, 10)
     
-
