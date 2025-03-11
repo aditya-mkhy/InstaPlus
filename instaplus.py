@@ -106,7 +106,7 @@ class InstaPlus:
                     log(f"Like by hashtag is completed for hashtag : {tag}")
             except Exception as e:
                 log(f"Hashtag [{tag}] Search Error : {e}")
-
+            
             sleep_uniform(30, 80)
 
         # information
@@ -165,14 +165,14 @@ if __name__ == "__main__":
     tags = ["#ironman", "#waterfall",]
 
     hashtags = [
-        "#tbt",
-        "#like4like",
-        "#followme",
-        "#picoftheday",
-        "#follow",
-        "#me",
-        "#selfie",
-        "#instadaily"
+        "#ben10",
+        "#demonslayer",
+        "#attackontitan",
+        "#ironman",
+        "#mahadev",
+        "#triund",
+        "#tree",
+        "#nature"
     ]
 
     hashtags = shuffle(hashtags)
@@ -191,7 +191,7 @@ if __name__ == "__main__":
     instaBot.explore(amount=30, do_comments=True, do_like_comments=True, randomize=False, follow = False)
 
     # log("Shutdown init")
-    sleep(60*5)
+    # sleep(60*5)
     # os.system("shutdown /h")
     # instaBot.like_by_hashtag(tags=hashtags2, amount=30, do_comments=True, do_like_comments=True, randomize=False)
 
