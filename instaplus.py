@@ -172,12 +172,33 @@ if __name__ == "__main__":
         "#mahadev",
         "#triund",
         "#tree",
-        "#nature"
+        "#nature",
+        "#waterfall",
+        "#tree",
+        "#sky",
+        "#northernlights",
+        "#ocean",
+        "#wales",
+        "#wildlife",
+        "#birds",
+        "#love"
     ]
+
+    # hashtags = [
+    #     "#InstaGood", "#InstaLike", "#InstagramHub", "#InstaDaily", "#InstaPic",
+    #     "#LifeStyle", "#Motivation", "#Wellness", "#Fitness", "#SelfCare",
+    #     "#Fashionista", "#StreetStyle", "#StyleInspo", "#FashionAddict", "#InstaFashion",
+    #     "#Foodie", "#FoodPorn", "#Yummy", "#FoodLover", "#HealthyEats",
+    #     "#TravelGram", "#Wanderlust", "#TravelAddict", "#NomadLife", "#TravelDiaries",
+    #     "#TechSavvy", "#Innovation", "#TechNews", "#GadgetGoals", "#AI",
+    #     "#PhotographyLovers", "#PhotoArt", "#InstaArtist", "#CreativeShots", "#InstaPhoto",
+    #     "#FollowMe", "#InstaFollow", "#LikeForFollow", "#Followers", "#FollowTrain"
+    # ]
+
 
     hashtags = shuffle(hashtags)
 
-    # instaBot.explore(amount=2, do_comments=True, do_like_comments=True, randomize=False, follow = False)
+    instaBot.explore(amount=2, do_comments=True, do_like_comments=True, randomize=False, follow = False)
 
 
     instaBot.like_by_hashtag(tags=hashtags[:len(hashtags)//2], amount=20, do_comments=True, do_like_comments=True, randomize=False, follow=False)
@@ -187,8 +208,8 @@ if __name__ == "__main__":
     instaBot.like_by_hashtag(tags=hashtags[len(hashtags)//2:], amount=20, do_comments=True, do_like_comments=True, randomize=True, follow=False)
     instaBot.like_by_feed(amount=10, do_comments=False, do_like_comments=False, randomize=True)
 
-    # sleep(10*1)
-    instaBot.explore(amount=30, do_comments=True, do_like_comments=True, randomize=False, follow = False)
+    sleep(10*1)
+    instaBot.explore(amount=1000, do_comments=True, do_like_comments=True, randomize=False, follow = False)
 
     # log("Shutdown init")
     # sleep(60*5)
