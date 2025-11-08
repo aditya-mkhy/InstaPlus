@@ -9,6 +9,7 @@ import images
 from util import *
 from text_comments import TextComments
 from carousel import close_carousel,  like_comments, make_comment
+from db import DB
 
 def home_window():
     #chek if reels winow is already opend
@@ -63,7 +64,7 @@ def positioned_like_button(loc_y, height):
         time.sleep(random.uniform(0.1, 0.4))
 
     
-def like_feed(amount = 5, do_comments = True, do_like_comments = False, randomize = True,  save_post = False):
+def like_feed(amount = 5, do_comments = True, do_like_comments = False, randomize = True,  save_post = False, db: DB = None):
     liked = 0
     total_comment = 0
     comment_liked = 0
@@ -116,13 +117,10 @@ def like_feed(amount = 5, do_comments = True, do_like_comments = False, randomiz
             if comment_btn and  ((do_comments and decision()) or (do_comments and not randomize)):
                 click_btn(comment_btn, 1, 10, 1, 10)
                 sleep_uniform(0.8, 2)
-
-                info = feed_comment(do_like_comments=do_like_comments, randomize=randomize)
-                if len(info[0]) != 0:
-                    total_comment += 1
-                comment_liked += info[1]
+                feed_comment(do_like_comments=do_like_comments, randomize=randomize, db=db)
 
             liked += 1
+            db.add_like()
             log(f"Post liked [{liked}/{amount}]")
             move_to(like_btn, 80, 300, 150, 300, x_opr="+", y_opr="-")
 
@@ -150,7 +148,7 @@ def like_feed(amount = 5, do_comments = True, do_like_comments = False, randomiz
 
 
 
-def feed_comment(do_like_comments = True, randomize = True,  save_post = False):
+def feed_comment(do_like_comments = True, randomize = True,  save_post = False, db: DB = None):
     comments_liked = 0
     text_comments_obj = None
     commented = []
@@ -178,6 +176,7 @@ def feed_comment(do_like_comments = True, randomize = True,  save_post = False):
 
         sleep_uniform(0.1, 0.4)
         pyautogui.click()
+        db.add_like()
         log(f"Post liked")
 
     else:
@@ -185,9 +184,11 @@ def feed_comment(do_like_comments = True, randomize = True,  save_post = False):
         if liked_btn:
             log("Post is already Liked...")
             like_btn = liked_btn
+            db.add_already_liked()
+
         else:
             log("-------> Like button not found...")
-            return (commented, comments_liked)
+            return
         
         sleep_uniform(0.1, 0.4)
 
@@ -196,7 +197,7 @@ def feed_comment(do_like_comments = True, randomize = True,  save_post = False):
     commnet_like_amout = random.randint(2, 5)
 
     #Like ccommets
-    comments_liked, commented_emoji = like_comments(like_btn, amount=commnet_like_amout, do_like=is_like_comment)
+    commented_emoji = like_comments(like_btn, amount=commnet_like_amout, do_like=is_like_comment, db=db)
     log(f"Comments liked -> {comments_liked} ")
     if commented_emoji == {}:
         log("No emoji is found in comments..")
@@ -205,10 +206,11 @@ def feed_comment(do_like_comments = True, randomize = True,  save_post = False):
     else:
         log("Try to comment on post")
         commented, is_comment_box_focus = make_comment(commented_emoji, text_comments_obj)
-        log(f"Commented : {' '.join(commented)}")
+        if commented:
+            db.add_comment()
+            log(f"Commented : {' '.join(commented)}")
 
     close_carousel()
-    return (commented, comments_liked)
 
 
 

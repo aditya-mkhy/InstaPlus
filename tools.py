@@ -226,10 +226,10 @@ def search_user(query):
         if not posts_label:
             raise ValueError("TOP POST label not found....")
         
-    # check if "no post yet"
-    no_post_label = locate(images.search.no_post_yet_label, confidence= 0.85)
-    if no_post_label:
-        return "no_post"
+    # # check if "no post yet"
+    # no_post_label = locate(images.search.no_post_yet_label, confidence= 0.85)
+    # if no_post_label:
+    #     return "no_post"
 
     #srcoll the post 
 
@@ -267,10 +267,6 @@ def shuffle(lst:  list):
         lst.remove(elmt)
     
     return new_lst
-
-
-
-        
 
 
 if __name__ == "__main__":

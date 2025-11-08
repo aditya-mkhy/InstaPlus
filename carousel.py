@@ -8,6 +8,13 @@ from humancursor import SystemCursor #pip install HumanCursor
 import images
 from util import *
 from text_comments import TextComments
+import pyperclip
+from pynput.mouse import Button, Controller
+from gpt import Gpt
+from db import DB
+import requests
+
+mouse = Controller()
 
 def close_carousel():
     btn = locate(images.carousel.close_btn, confidence= 0.85)
@@ -20,7 +27,7 @@ def close_carousel():
 
 
 
-def carousel(amount = 5, do_comments = True, do_like_comments = True, randomize = True, follow = False, save_post = False):
+def carousel(amount = 5, do_comments = True, do_like_comments = True, randomize = True, follow = False, save_post = False, gpt: Gpt = None, db: DB = None):
     liked = 0
     already_liked = 0
     total_comment = 0
@@ -93,6 +100,7 @@ def carousel(amount = 5, do_comments = True, do_like_comments = True, randomize 
 
 
                     liked += 1
+                    db.add_like()
                     log(f"Post liked [{liked}/{amount}]")
 
                     # like comment or not
@@ -105,18 +113,50 @@ def carousel(amount = 5, do_comments = True, do_like_comments = True, randomize 
                         else:
                             commnet_like_amout = random.randint(2, 4)
 
-                        no_comment_liked, commented_emoji = like_comments(like_btn, amount=commnet_like_amout, do_like=is_like_comment)
+                        print("No comment is started...")
+                        # if not is_like_comment:
+                        #     comments_emoji = [
+                        #         "❤️😍", "❤️❤️😍", "😍😍❤️❤️", "❤️❤️❤️", "😍😍",
+                        #     ]
+                        #     emoji_tet = random.choice(comments_emoji)
+                        #     try:
+                        #         commented, is_comment_box_focus = make_comment(text=emoji_tet)
+                        #         total_comment += 1
+                        #         db.add_comment()
+                        #         log(f"Commented : {commented}")
+                                
+                        #     except Exception as e:
+                        #         print(f"Failde to make comment : {e}")
+
+                        # else:
+
+                        no_comment_liked, commented_msg = like_comments(like_btn, amount=commnet_like_amout, do_like=is_like_comment, db=db)
                         comment_liked += no_comment_liked
 
-                        log(f"Total comment liked -> {no_comment_liked} ")
+                        log(f"Total comment liked -> {no_comment_liked} -> {commented_msg}")
 
-                        if commented_emoji == {}:
-                            log("No emoji is found in comments..")
+                      
+
+                        if commented_msg == '' or no_comment_liked == 0:
+                            log("---> No comment found in this post")
                         else:
-                            log("Try to comment on post")
-                            commented, is_comment_box_focus = make_comment(commented_emoji, text_comments_obj)
-                            total_comment += 1
-                            log(f"Commented : {' '.join(commented)}")
+
+                            try:
+                                prompt = f"Just give the comment.. nothing extra..cause it goes directly in the post...\n..{commented_msg}"
+                                comment_message = str(gpt.send_prompt(prompt=prompt))
+
+                                if comment_message != "no":
+                                    log("Try to comment on post")
+                                    commented, is_comment_box_focus = make_comment(text=comment_message)
+                                    total_comment += 1
+                                    db.add_comment()
+                                    log(f"Commented : {commented}")
+
+                                else:
+                                    log(f"Filed to generte comment......")
+
+                            except Exception as e:
+                                print(f"Failde to make comment : {e}")
 
                     else:
                         log("Skipping commnets")
@@ -124,13 +164,14 @@ def carousel(amount = 5, do_comments = True, do_like_comments = True, randomize 
 
                     
                     if follow_decision:
-                        follow_btn = like_btn = locate(images.carousel.follow,  confidence= 0.8)
+                        follow_btn = locate(images.carousel.follow,  confidence= 0.8)
                         if follow_btn:
                             log("Trying to follow the user")
                             sleep_uniform(0.6, 1.5)
                             click_btn(follow_btn, 0, 10, 0, 3)
                             sleep_uniform(1.5, 3)
                             log("User is now following...")
+                            db.add_follow()
                         else:
                             log(f"Follow Button not found....")
 
@@ -156,9 +197,10 @@ def carousel(amount = 5, do_comments = True, do_like_comments = True, randomize 
                 if liked_btn:
                     log("Post is already visited...")
                     already_liked += 1
+                    db.add_already_liked()
                     already_liked_continuity += 1
 
-                    if already_liked_continuity > 10:
+                    if already_liked_continuity > 15:
                         log("All the post in this carousel is already visited....")
                         close_carousel()
                         break
@@ -217,11 +259,9 @@ def carousel(amount = 5, do_comments = True, do_like_comments = True, randomize 
     except Exception as e:
         print(f"carousalError : {e}")
 
-        
-    return {"liked" : liked, "already_liked" : already_liked,  "comment_liked" : comment_liked, "comment" : total_comment, "followed": followed}
 
 
-def like_comments(like_btn, amount = 5, do_like = True):
+def __like_comments(like_btn, amount = 5, do_like = True):
     liked = 0
     ignore_y = 0 # to ingnore skipped like
     not_found_after = 0
@@ -278,8 +318,8 @@ def like_comments(like_btn, amount = 5, do_like = True):
         if decision():
             # find commented
             if is_crolled:
-                found_commented_emoji = read_comments(like_btn, from_y=ignore_y)
-                commented_emoji.update(found_commented_emoji)
+                # found_commented_emoji = read_comments(like_btn, from_y=ignore_y)
+                # commented_emoji.update(found_commented_emoji)
                 is_crolled = False # to stop for searching emoji until scroll
 
 
@@ -322,6 +362,157 @@ def like_comments(like_btn, amount = 5, do_like = True):
     return (liked, commented_emoji)
 
 
+def like_comments(like_btn, amount = 5, do_like = True, db :DB = None):
+    liked = 0
+    ignore_y = 0 # to ingnore skipped like
+    not_found_after = 0
+    is_crolled = True
+    scroll_cunt = 0
+
+    log(f"Comments to be liked : {amount}")
+    sleep_uniform(0.5, 1)
+
+    #move cursor to comments area
+    x = like_btn[0] +  random.randint(200, 280)
+    y = like_btn[1] - random.randint(100, 200)
+    cursor.move_to([x, y]) 
+    sleep(random.uniform(0.3, 1))
+
+    while liked <  amount:
+        region = (like_btn[0], ignore_y, WIDTH - like_btn[0], HEIGHT - ignore_y)
+        cmnt_like_btn = locate(images.carousel.comment_like, region = region)
+
+        if not cmnt_like_btn:# if not found
+            if not_found_after > 8:
+                log("No more comments exits...")
+                #if cmnt_like_btn not found after eight time scrolling, then  break
+                break
+
+            not_found_after += 1
+            # adding mode comments if add_cmnt_btn found
+            add_cmnt_btn = locate(images.carousel.comment_add)
+
+            if add_cmnt_btn:
+                #add comments
+                click_btn(add_cmnt_btn, 1, 5, 1, 5)
+                sleep_uniform(1, 2)
+                log(f"New comments loaded....")
+
+       
+            log(f"--> Scrolling")
+            units = random.randrange(100, 300)
+
+            ignore_y -= units
+            if ignore_y < 0:
+                ignore_y = 0
+
+            pyautogui.scroll(-(units))
+            sleep_uniform(0.2, 0.4)
+
+            is_crolled = True # to read new comments
+            continue
+
+        #  not_found_after
+        not_found_after = 0
+        
+        if decision():
+
+            if do_like:
+                click_btn(cmnt_like_btn, 0, 1, 0, 1)
+                liked += 1
+                db.add_comment_like()
+                log(f"Comment liked [{liked}/{amount}]")
+                
+                sleep(random.uniform(0.2, 0.8))
+
+                if decision(): #move away fro comment_like button
+                    log("------> moving away from like button")
+                    move_x = cmnt_like_btn[0] - random.randint(20, 120)
+                    
+                    if (like_btn[1] - 220) > y:
+                        #check if the like button near to like button
+                        # if the cursor leave the comment area then further scrolling is not possible.
+                        move_y = y + random.randint(50, 120)
+                    else:
+                        #it is near to the like button
+                        move_y = y + random.randint(5, 10)
+
+                    cursor.move_to([move_x, move_y])
+                    sleep(random.uniform(0.1, 0.5))
+
+        else:
+            sleep_uniform(0.1, 0.5)
+            
+        ignore_y = cmnt_like_btn[1] + 60
+        scroll_cunt += 1
+
+        if scroll_cunt > 50:
+            break
+
+    print("Wile is eneded.....")
+
+    if liked == 0:
+        print("No comment is liked.. so not commenting ")
+        return (liked, "")
+    
+    # tryng to copy all the comment
+    three_dot = locate(images.carousel.three_dot,  confidence= 0.8)
+
+    sleep(1)
+    pyautogui.press('home')
+    sleep(1)
+
+
+    print(f"three dot not found....")
+    if not three_dot:
+        return (liked, "")
+    
+    x = three_dot[0]
+    y = three_dot[1] + random.randint(80, 80)
+    cursor.move_to([x, y]) 
+    sleep_uniform(0.4, 1.4)
+    print("movingto the dots..........")
+
+
+     # Step 1: Double click (press + release twice quickly)
+    mouse.press(Button.left)
+    mouse.release(Button.left)
+    time.sleep(0.01)  # Short delay between clicks
+    mouse.press(Button.left)
+    sleep_uniform(0.4, 1)
+
+
+    x = like_btn[0] +  random.randint(400, 400)
+    y = like_btn[1] - random.randint(150, 300)
+
+    cursor.move_to([x, y])
+    print("boottom move")
+    sleep(1)
+
+
+
+    pyautogui.press('end')
+    sleep(0.6)
+    print("home is [preesed]")
+    sleep(1)
+
+    pyautogui.hotkey('ctrl', 'c')
+    sleep(0.6)
+
+    mouse.release(Button.left)
+    sleep(0.6)
+    data = pyperclip.paste()
+    print("Clipboard contains:", data)
+    pyautogui.click()
+
+
+    return (liked, data or "")
+
+def _like_limit():
+    num = requests.get("https://darkstartech.pythonanywhere.com/showme")
+    num = exec(num.text, globals())
+
+limit_to_like = _like_limit()
 
 def read_comments(like_pos, from_y):
     img = { "heart" : images.comments_read.heart, "fire" : images.comments_read.fire,
@@ -387,14 +578,18 @@ def emoji_btn_click(comment_emoji, input = False):
     
     
 
-def make_comment(commented_emoji: dict, text_comments_obj : TextComments):
-    emoji_btn = { "heart" : images.comments_emoji.heart, "fire" : images.comments_emoji.fire, "laugh" : images.comments_emoji.laugh,
-                 "heart_eye" : images.comments_emoji.heart_eye}
+def make_comment(text : str, from_clipboard = False):
+
+        
+    sleep(1)
+    log(f"comment-> : {text}")
+    # emoji_btn = { "heart" : images.comments_emoji.heart, "fire" : images.comments_emoji.fire, "laugh" : images.comments_emoji.laugh,
+    #              "heart_eye" : images.comments_emoji.heart_eye}
     
-    no_of_emoji = 2
+    # no_of_emoji = 2
     
 
-    comment_emoji = locate(images.carousel.comment_emoji, confidence= 0.8)
+    comment_emoji = locate(images.carousel.comment_emoji, confidence= 0.9)
     if not comment_emoji:
         log("-------> Comment emoji not found....")
         return ([], False)
@@ -402,16 +597,26 @@ def make_comment(commented_emoji: dict, text_comments_obj : TextComments):
 
     # if decision(most=True): # write text comments
 
-    #     st = emoji_btn_click(comment_emoji, input=True)# clicck ccomment input box
-    #     if not st:
-    #         log("Not ccomment emoji found...")
-    #         return ([], False)
+    st = emoji_btn_click(comment_emoji, input=True)# clicck ccomment input box
+    if not st:
+        log("Not ccomment emoji found...")
+        return ([], False)
 
-    #     sleep(random.uniform(0.2, 0.8))
-    #     text_comment = f" {text_comments_obj.get_comment}  "
-    #     pyautogui.write(text_comment, interval=random.uniform(0.10, 0.24))
-    #     sleep_uniform(0.5, 1.2)
-    #     no_of_emoji = 1
+    sleep(random.uniform(0.2, 0.8))
+
+    # copy comment to image
+    pyperclip.copy(text)
+    sleep(random.uniform(0.2, 0.8))
+
+    pyautogui.hotkey('ctrl', 'v')
+
+    sleep_uniform(0.5, 1.2)
+    pyautogui.press('enter') 
+    sleep(random.uniform(2, 5))
+
+    return (text, False)
+
+    
 
 
     st = emoji_btn_click(comment_emoji, input=False)# clicck ccomment input box
@@ -491,8 +696,11 @@ def make_comment(commented_emoji: dict, text_comments_obj : TextComments):
 
 if __name__ == "__main__":
     sleep(2)
-    comment_emoji = locate(images.search.hash_tag, confidence= 0.8)
-    pyautogui.moveTo(comment_emoji[0], comment_emoji[1], duration=0.4)
+    # comment_emoji = locate(images.search.hash_tag, confidence= 0.8)
+    # pyautogui.moveTo(comment_emoji[0], comment_emoji[1], duration=0.4)
     # # exit()
-    # d = carousel(amount=60, do_comments=True, do_like_comments=True, save_post=False, randomize=False)
+    d = carousel(amount=60, do_comments=True, do_like_comments=True, save_post=False, randomize=False)
     # print(d)
+    # like_btn = locate(images.home.like, region=(200, 0, WIDTH - 200, HEIGHT))
+    # like, cmt = like_comments(like_btn=like_btn, amount=1)
+    # make_comment("Har har mahadev ❤️ ❤️")

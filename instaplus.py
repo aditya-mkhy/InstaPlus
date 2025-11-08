@@ -8,7 +8,7 @@ from carousel import carousel
 from tools import open_explore, search_hashtag, search_user, shuffle
 from feed import like_feed
 from db import DB, today
-
+from gpt import Gpt
 
 class InstaPlus:
     def __init__(self, browser_path = None) -> None:
@@ -30,59 +30,43 @@ class InstaPlus:
         #to store profile
         self.reels_share_profile = {}
         self.db = DB()
+
+        self.gpt = Gpt()
+
         
 
 
     def like_by_feed(self, amount = 5, do_comments = True, do_like_comments = False, randomize = True,  save_post = False ):
-        info = {"liked" : 0, "comment" : 0, "comment_liked" : 0}
+        self.db.display(title="Like_by_feed  task -> started")
+
         try:
-            info = like_feed(amount, do_comments, do_like_comments, randomize, save_post)
+            like_feed(amount, do_comments, do_like_comments, randomize, save_post, db = self.db)
         except Exception as e:
             log(f"Error[001] : {e}")
 
-        if info:
-            sleep_uniform(0.1, 0.2)
-            log("--------Like_by_feed task finished-----------------")
-            log(f"Post Liked : {info['liked']}")
-            log(f"Numer of Comments : {info['comment']}")
-            log(f"Comments liked  : {info['comment_liked']}")
-            log("---------------------------------------------------")
-        else:
-            log("An error occured during Like_by_feed task.")
+        self.db.display(title="Like_by_feed  task -> Finished")
 
 
-    def explore(self, amount = 5, do_comments = True, do_like_comments = False, randomize = True, follow = True, save_post = False ):
-        info = self.db.get_today()
-        print(f"PrevData : {info}")
-
+    def explore(self, amount = 5, do_comments = True, do_like_comments = True, randomize = True, follow = True, save_post = False ):
         st = open_explore()
         if not st:
             log("Not able to open explore window, please check the error..")
             return
-
+        
+        self.db.display(title="Explore  task -> Started")
         try:
-            data = carousel(amount=amount, do_comments=do_comments, do_like_comments=do_like_comments, 
-                            randomize=randomize,follow=follow, save_post=save_post)
-            info.update(data)
-            self.db[today()] = info #save data
-            
+            carousel(amount=amount, do_comments=do_comments, do_like_comments=do_like_comments, 
+                            randomize=randomize,follow=follow, save_post=save_post, gpt=self.gpt, db = self.db)
+        
         except Exception as e:
             log(f"Error[002] : {e}")
 
-        log("--------Explore task finished--------------------")
-        log(f"Post Liked : {info['liked']}")
-        log(f"Post Already Liked  : {info['already_liked']}")
-        log(f"Numer of Comments : {info['comment']}")
-        log(f"Comments liked  : {info['comment_liked']}")
-        log(f"Following  : {info['followed']}")
-        log("-------------------------------------------------")
-        
+        self.db.display(title="Explore task -> Finished")
 
     
-    def like_by_hashtag(self, tags = list, amount = 5, do_comments = True, do_like_comments = False, randomize = True, follow = False, save_post = False ):
-        log("Task : Like post by Hashtag..")
-        info = {"liked" : 0, "already_liked" : 0, "comment" : 0, "comment_liked" : 0, "followed": 0}
-
+    def like_by_hashtag(self, tags = list, amount = 5, do_comments = True, do_like_comments = True, randomize = True, follow = False, save_post = False ):
+        self.db.display(title="Like By HashTag -> Started")
+        
         for tag in tags:
             if tags.index(tag) == 0:
                 refresh = False
@@ -96,14 +80,9 @@ class InstaPlus:
                 continue
 
             try:
-                tag_info = carousel(amount=amount, do_comments=do_comments, do_like_comments=do_like_comments, 
-                                        randomize=randomize,follow=follow, save_post=save_post)
-                if not tag_info:
-                    log("An error occured during like by hashtag task.")
-
-                else:
-                    update_info(info, tag_info)
-                    log(f"Like by hashtag is completed for hashtag : {tag}")
+                carousel(amount=amount, do_comments=do_comments, do_like_comments=do_like_comments, 
+                                        randomize=randomize,follow=follow, save_post=save_post, gpt=self.gpt, db = self.db)
+               
             except Exception as e:
                 log(f"Hashtag [{tag}] Search Error : {e}")
             
@@ -111,23 +90,13 @@ class InstaPlus:
 
         # information
         sleep_uniform(0.1, 0.2)
-        log("--------Hashtags task finished----------------------")
-        log(f"Post Liked : {info['liked']}")
-        log(f"Post Already Liked  : {info['already_liked']}")
-        log(f"Numer of Comments : {info['comment']}")
-        log(f"Comments liked  : {info['comment_liked']}")
-        log(f"Following  : {info['followed']}")
-
-        log("----------------------------------------------------")
-
+        self.db.display(title="Like By HashTag -> Finished")
 
 
     def like_by_user(self, users = [], amount = 5, do_comments = True, do_like_comments = False, randomize = True,  save_post = False ):
-        log("Task : Like post by Usernames..")
-        info = {"liked" : 0, "already_liked" : 0, "comment" : 0, "comment_liked" : 0}
+        self.db.display(title="Like By Users -> Started")
 
         for user in users:
-
             st = search_user(user)
             if not st:
                 log("An error occured during searching for User.")
@@ -138,37 +107,23 @@ class InstaPlus:
                 sleep_uniform(2, 5)
                 continue
 
-            user_info = carousel(amount=amount, do_comments=do_comments, do_like_comments=do_like_comments, 
-                                    randomize=randomize, save_post=save_post)
-            if not user_info:
-                log("An error occured during like by User task.")
-
-            else:
-                info.update(user_info)
-                log(f"Like by User is completed for hashtag : {user}")
+            carousel(amount=amount, do_comments=do_comments, do_like_comments=do_like_comments, 
+                                randomize=randomize, save_post=save_post, gpt=self.gpt, db = self.db)
 
         # information
         sleep_uniform(0.1, 0.2)
-        log("--------Like by Users task finished----------------")
-        log(f"Post Liked : {info['liked']}")
-        log(f"Post Already Liked  : {info['already_liked']}")
-        log(f"Numer of Comments : {info['comment']}")
-        log(f"Comments liked  : {info['comment_liked']}")
-        log("---------------------------------------------------")
-        
-        
+        self.db.display(title="Like By Users -> Started")
+
         
 if __name__ == "__main__":
 
-
     instaBot = InstaPlus()
-    tags = ["#ironman", "#waterfall",]
+    tags = [
+        "#ironman", 
+        "#waterfall"
+    ] #45
 
     hashtags = [
-        "#ben10",
-        "#demonslayer",
-        "#attackontitan",
-        "#ironman",
         "#mahadev",
         "#triund",
         "#tree",
@@ -178,45 +133,66 @@ if __name__ == "__main__":
         "#sky",
         "#northernlights",
         "#ocean",
-        "#wales",
         "#wildlife",
         "#birds",
-        "#love"
+        "#love",
+        "#tracking",
+        "#travel",
+        "#exploring"
+    ]
+
+    hashtags = [
+        "#InstaGood", "#InstaLike", "s#InstagramHub", "#InstaDaily", "#InstaPic",
+        "#LifeStyle", "#Motivation", "#Wellness", "#Fitness", "#SelfCare",
+        "#Fashionista", "#StreetStyle", "#StyleInspo", "#FashionAddict", "#InstaFashion",
+        "#Foodie", "#FoodPorn", "#Yummy", "#FoodLover", "#HealthyEats",
+        "#TravelGram", "#Wanderlust", "#TravelAddict", "#NomadLife", "#TravelDiaries",
+        "#TechSavvy", "#Innovation", "#TechNews", "#GadgetGoals", "#AI",
+        "#PhotographyLovers", "#PhotoArt", "#InstaArtist", "#CreativeShots", "#InstaPhoto",
+        "#FollowMe", "#InstaFollow", "#LikeForFollow", "#Followers", "#FollowTrain"
     ]
 
     # hashtags = [
-    #     "#InstaGood", "#InstaLike", "#InstagramHub", "#InstaDaily", "#InstaPic",
-    #     "#LifeStyle", "#Motivation", "#Wellness", "#Fitness", "#SelfCare",
-    #     "#Fashionista", "#StreetStyle", "#StyleInspo", "#FashionAddict", "#InstaFashion",
-    #     "#Foodie", "#FoodPorn", "#Yummy", "#FoodLover", "#HealthyEats",
-    #     "#TravelGram", "#Wanderlust", "#TravelAddict", "#NomadLife", "#TravelDiaries",
-    #     "#TechSavvy", "#Innovation", "#TechNews", "#GadgetGoals", "#AI",
-    #     "#PhotographyLovers", "#PhotoArt", "#InstaArtist", "#CreativeShots", "#InstaPhoto",
-    #     "#FollowMe", "#InstaFollow", "#LikeForFollow", "#Followers", "#FollowTrain"
+    #     "#shiml",
+    #     "#shimlatrip",
+    #     "#viral",
+    #     "#explore",
+    #     "#instagram",
+    #     "#winter",
+    #     "#hills",
+    #     "#travel",
+    #     "#explorepage",
     # ]
-
 
     hashtags = shuffle(hashtags)
 
-    instaBot.explore(amount=2, do_comments=True, do_like_comments=True, randomize=False, follow = False)
+
+    #instaBot.explore(amount=200, do_comments=True, do_like_comments=True, randomize=False, follow = True)
+
+    #nstaBot.like_by_feed(amount=5, do_comments=False, do_like_comments=False, randomize=True)
+
+    for i in range(len(hashtags) // 5):
+        use_tag = hashtags[:5]
+        hashtags = hashtags[:5]
+        instaBot.like_by_hashtag(tags=use_tag, amount=30, do_comments=True, do_like_comments=True, randomize=False, follow=False)
+
+        sleep_uniform(300, 800)
 
 
-    instaBot.like_by_hashtag(tags=hashtags[:len(hashtags)//2], amount=20, do_comments=True, do_like_comments=True, randomize=False, follow=False)
+    #instaBot.like_by_feed(amount=10, do_comments=False, do_like_comments=False, randomize=True)
 
-    instaBot.like_by_feed(amount=5, do_comments=False, do_like_comments=False, randomize=True)
-
-    instaBot.like_by_hashtag(tags=hashtags[len(hashtags)//2:], amount=20, do_comments=True, do_like_comments=True, randomize=True, follow=False)
-    instaBot.like_by_feed(amount=10, do_comments=False, do_like_comments=False, randomize=True)
-
-    sleep(10*1)
-    instaBot.explore(amount=1000, do_comments=True, do_like_comments=True, randomize=False, follow = False)
-
-    # log("Shutdown init")
-    # sleep(60*5)
-    # os.system("shutdown /h")
-    # instaBot.like_by_hashtag(tags=hashtags2, amount=30, do_comments=True, do_like_comments=True, randomize=False)
+    #leep(10*1)
+    # user = []
+    # for i  in range(50):
+    #     user.append("shrusti.music")
+    # instaBot.like_by_user( users = user, amount = 500, do_comments = True, do_like_comments = True, randomize = False,  save_post = False )
 
 
+    instaBot.explore(amount=100, do_comments=True, do_like_comments=True, randomize=False, follow = False)
+
+    log("Shutdown in two minutes....")
+    sleep(60*2)
+    os.system("shutdown /h")
 
     # try:
 
@@ -227,5 +203,5 @@ if __name__ == "__main__":
 
     # import os
     # os.system("shutdown /h")
+    
 
-    # instaBot.like_by_user(users=["heidikvam"], amount=1000, do_comments=True, do_like_comments=False, randomize=False)

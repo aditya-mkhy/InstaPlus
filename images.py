@@ -72,7 +72,7 @@ class search:
     close_btn = "./data/search_close_btn.png"
     top_post_label = "./data/search_top_post_label.png"
     hash_tag = "./data/hash.png"
-    posts_label = "./data/search_posts_label.png"
+    posts_label = "./data/post.png"
     no_post_yet_label = "./data/search_no_post_yet_label.png"
 
 
