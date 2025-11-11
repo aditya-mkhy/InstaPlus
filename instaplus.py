@@ -9,6 +9,7 @@ from tools import open_explore, search_hashtag, search_user, shuffle
 from feed import like_feed
 from db import DB, today
 from gpt import Gpt
+import os
 
 class InstaPlus:
     def __init__(self, browser_path = None) -> None:
@@ -152,25 +153,16 @@ if __name__ == "__main__":
         "#FollowMe", "#InstaFollow", "#LikeForFollow", "#Followers", "#FollowTrain"
     ]
 
-    # hashtags = [
-    #     "#shiml",
-    #     "#shimlatrip",
-    #     "#viral",
-    #     "#explore",
-    #     "#instagram",
-    #     "#winter",
-    #     "#hills",
-    #     "#travel",
-    #     "#explorepage",
-    # ]
+   
 
     hashtags = shuffle(hashtags)
 
 
-    #instaBot.explore(amount=200, do_comments=True, do_like_comments=True, randomize=False, follow = True)
+    instaBot.explore(amount=200, do_comments=True, do_like_comments=True, randomize=False, follow = True)
 
-    #nstaBot.like_by_feed(amount=5, do_comments=False, do_like_comments=False, randomize=True)
+    instaBot.like_by_feed(amount=5, do_comments=False, do_like_comments=False, randomize=True)
 
+    # sleep after every 5 hashtag
     for i in range(len(hashtags) // 5):
         use_tag = hashtags[:5]
         hashtags = hashtags[:5]
@@ -179,13 +171,13 @@ if __name__ == "__main__":
         sleep_uniform(300, 800)
 
 
-    #instaBot.like_by_feed(amount=10, do_comments=False, do_like_comments=False, randomize=True)
+    instaBot.like_by_feed(amount=10, do_comments=False, do_like_comments=False, randomize=True)
 
-    #leep(10*1)
-    # user = []
-    # for i  in range(50):
-    #     user.append("shrusti.music")
-    # instaBot.like_by_user( users = user, amount = 500, do_comments = True, do_like_comments = True, randomize = False,  save_post = False )
+    sleep(10*1)
+    user = []
+    for i  in range(50):
+        user.append("shrusti.music")
+    instaBot.like_by_user( users = user, amount = 500, do_comments = True, do_like_comments = True, randomize = False,  save_post = False )
 
 
     instaBot.explore(amount=100, do_comments=True, do_like_comments=True, randomize=False, follow = False)
@@ -193,15 +185,5 @@ if __name__ == "__main__":
     log("Shutdown in two minutes....")
     sleep(60*2)
     os.system("shutdown /h")
-
-    # try:
-
-    #     instaBot.explore(amount=50, do_comments=True, do_like_comments=False, randomize=False)
-
-    # except Exception as e:
-    #     log(f"Error ==> {e}")
-
-    # import os
-    # os.system("shutdown /h")
     
 
