@@ -4,14 +4,13 @@
 It’s designed to behave like a human, reducing the chance of detection while improving engagement automation.
 
 > A lightweight and intelligent Instagram automation tool that behaves more human than bot.
-
----
+<br>
 
 ![Python](https://img.shields.io/badge/Python-3.10%2B-blue)
 ![License](https://img.shields.io/badge/License-MIT-green)
 ![Status](https://img.shields.io/badge/Status-Active-brightgreen)
+<br>
 
----
 
 ## Features
 
@@ -23,8 +22,8 @@ It’s designed to behave like a human, reducing the chance of detection while i
 -  **Dynamic delays** and randomized actions  
 -  **Local database storage** for action history and usage tracking  
 -  **Smart automation logic** that prevents repetitive behavior
+<br>
 
----
 
 ## Project Structure
 
@@ -44,8 +43,8 @@ InstaPlus/
 ├─ LICENSE
 └─ README.md
 ```
+<br>
 
----
 
 ## Installation
 
@@ -109,8 +108,8 @@ instaBot.like_by_hashtag(tags=hashtags, amount=30, do_comments=True, do_like_com
 bot.explore(amount=100, do_comments=True, do_like_comments=True, randomize=False, follow = False)
 
 ```
+<br>
 
----
 
 ## How It Works
 
@@ -128,8 +127,8 @@ bot.explore(amount=100, do_comments=True, do_like_comments=True, randomize=False
 
 5. **Comment generation**  
    Uses integrated GPT module (`gpt.py`) to create context-aware comments automatically.
+<br>
 
----
 
 ## Security Notes
 
@@ -147,14 +146,13 @@ bot.explore(amount=100, do_comments=True, do_like_comments=True, randomize=False
 - `gpt.py` — Integrates AI-generated comments  
 - `tools.py` — Simulates keyboard/mouse behavior  
 - `db.py` — Logs user actions for smarter repetition control  
+<br>
 
----
 
 ## License
 
 This project is licensed under the **MIT License** — free to use, modify, and share.
-
----
+<br>
 
 ## Credits
 
