@@ -3,7 +3,7 @@
 **InstaPlus** is an advanced Instagram automation bot that mimics real user activity — liking posts, watching reels, commenting, and sharing — using smart cursor movements and keyboard inputs.  
 It’s designed to behave like a human, reducing the chance of detection while improving engagement automation.
 
-> 🚀 A lightweight and intelligent Instagram automation tool that behaves more human than bot.
+> A lightweight and intelligent Instagram automation tool that behaves more human than bot.
 
 ---
 
@@ -13,20 +13,20 @@ It’s designed to behave like a human, reducing the chance of detection while i
 
 ---
 
-## ✨ Features
+## Features
 
-- ❤️ **Auto-like posts** on the feed  
-- 🎥 **Interact with Reels** (like, comment, or share)  
-- 💬 **Generate AI-based comments** using GPT integration  
-- 📤 **Auto-share content** to increase engagement  
-- 🖱️ **Real mouse movements and keypresses** to simulate human behavior  
-- 🔁 **Dynamic delays** and randomized actions  
-- 🧠 **Local database storage** for action history and usage tracking  
-- 📈 **Smart automation logic** that prevents repetitive behavior
+-  **Auto-like posts** on the feed  
+-  **Interact with Reels** (like, comment, or share)  
+-  **Generate AI-based comments** using GPT integration  
+-  **Auto-share content** to increase engagement  
+-  **Real mouse movements and keypresses** to simulate human behavior  
+-  **Dynamic delays** and randomized actions  
+-  **Local database storage** for action history and usage tracking  
+-  **Smart automation logic** that prevents repetitive behavior
 
 ---
 
-## 📂 Project Structure
+## Project Structure
 
 ```
 InstaPlus/
@@ -47,7 +47,7 @@ InstaPlus/
 
 ---
 
-## ⚙️ Installation
+## Installation
 
 1. Clone the repo:
    ```bash
@@ -64,7 +64,7 @@ InstaPlus/
 
 ---
 
-## 🚀 Usage
+## Usage
 
 ### Run InstaPlus
 ```bash
@@ -112,7 +112,7 @@ bot.explore(amount=100, do_comments=True, do_like_comments=True, randomize=False
 
 ---
 
-## 🧠 How It Works
+## How It Works
 
 1. **Login**  
    It uses previous logged session in browser.
@@ -131,7 +131,7 @@ bot.explore(amount=100, do_comments=True, do_like_comments=True, randomize=False
 
 ---
 
-## 🔐 Security Notes
+## Security Notes
 
 - This bot **does not hack, scrape private data, or bypass login verification**.  
 - It interacts through your normal Instagram session, like a human user.  
@@ -140,7 +140,7 @@ bot.explore(amount=100, do_comments=True, do_like_comments=True, randomize=False
 
 ---
 
-## 🧩 Developer Notes
+## Developer Notes
 
 - `instaplus.py` — Main orchestrator of all actions  
 - `feed.py` & `reels.py` — Handle content scrolling and interaction  
@@ -150,12 +150,12 @@ bot.explore(amount=100, do_comments=True, do_like_comments=True, randomize=False
 
 ---
 
-## 🪄 License
+## License
 
 This project is licensed under the **MIT License** — free to use, modify, and share.
 
 ---
 
-## ⚡ Credits
+## Credits
 
 Developed with ❤️ for automation lovers who want to **stay human while being a bot**.
